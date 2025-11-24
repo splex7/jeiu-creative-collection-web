@@ -1,0 +1,158 @@
+{
+  "서지원": {
+    "name": "서지원",
+    "img": "faces/DJI_20250319120119_0686_서지원_person10_img01.jpg"
+  },
+  "유재성": {
+    "name": "유재성",
+    "img": "faces/DJI_20250319114143_0682_유재성_person04_img01.jpg"
+  },
+  "김은석": {
+    "name": "김은석",
+    "img": "faces/DJI_20250319102810_0671_김은석_person06_img01.jpg"
+  },
+  "박준혁": {
+    "name": "박준혁",
+    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=박"
+  },
+  "윤지우": {
+    "name": "윤지우",
+    "img": "https://via.placeholder.com/100/FFCA00/FFFFFF?text=윤"
+  },
+  "김재헌": {
+    "name": "김재헌",
+    "img": "faces/DJI_20250319103620_0673_김재헌_person03_img01.jpg"
+  },
+  "김준수": {
+    "name": "김준수",
+    "img": "faces/DJI_20250319111433_0677_김준수_person06_img01.jpg"
+  },
+  "박주환": {
+    "name": "박주환",
+    "img": "faces/DJI_20250319115533_0685_박주환_person07_img01.jpg"
+  },
+  "조상준": {
+    "name": "조상준",
+    "img": "faces/DJI_20250319104143_0674_조상준_person07_img01.jpg"
+  },
+  "이성우": {
+    "name": "이성우",
+    "img": "faces/DJI_20250319145836_0701_이성우_person01_img01.jpg"
+  },
+  "한민규": {
+    "name": "한민규",
+    "img": "faces/DJI_20250319102621_0670_한민규_person10_img01.jpg"
+  },
+  "오세준": {
+    "name": "오세준",
+    "img": "https://via.placeholder.com/100/FF6B00/FFFFFF?text=오"
+  },
+  "박성빈": {
+    "name": "박성빈",
+    "img": "faces/DJI_20250319114723_0683_박성빈_person09_img01.jpg"
+  },
+  "곽현우": {
+    "name": "곽현우",
+    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=곽"
+  },
+  "이다영": {
+    "name": "이다영",
+    "img": "https://via.placeholder.com/100/FFCA00/FFFFFF?text=이"
+  },
+  "유승민": {
+    "name": "유승민",
+    "img": "faces/DJI_20250319114723_0684_유승민_person02_img01.jpg"
+  },
+  "천규진": {
+    "name": "천규진",
+    "img": "faces/DJI_20250319103046_0672_천규진_person06_img01.jpg"
+  },
+  "전성민": {
+    "name": "전성민",
+    "img": "faces/DJI_20250319105141_0676_전성민_person09_img01.jpg"
+  },
+  "김재훈": {
+    "name": "김재훈",
+    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=김"
+  },
+  "김태연": {
+    "name": "김태연",
+    "img": "faces/DJI_20250319112249_0679_김태연_person10_img01.jpg"
+  },
+  "박민호": {
+    "name": "박민호",
+    "img": "https://via.placeholder.com/100/FF4D00/FFFFFF?text=박"
+  },
+  "김미리": {
+    "name": "김미리",
+    "img": "faces/DJI_20250319153659_0707_김미리_person09_img01.jpg"
+  },
+  "이준서": {
+    "name": "이준서",
+    "img": "faces/DJI_20250319112012_0678_이준서_person09_img01.jpg"
+  },
+  "박동휘": {
+    "name": "박동휘",
+    "img": "faces/DJI_20250319144342_0697_박동휘_person06_img01.jpg"
+  },
+  "정영수": {
+    "name": "정영수",
+    "img": "faces/DJI_20250319143533_0695_정영수_person05_img01.jpg"
+  },
+  "조현준": {
+    "name": "조현준",
+    "img": "faces/DJI_20250319142847_0692_조현준_person02_img01.jpg"
+  },
+  "윤종민": {
+    "name": "윤종민",
+    "img": "faces/DJI_20250319153447_0706_윤종민_person04_img01.jpg"
+  },
+  "김태준": {
+    "name": "김태준",
+    "img": "faces/DJI_20250319143313_0694_김태준_person03_img01.jpg"
+  },
+  "이주형": {
+    "name": "이주형",
+    "img": "faces/DJI_20250319144741_0698_이주형_person02_img01.jpg"
+  },
+  "함지원": {
+    "name": "함지원",
+    "img": "faces/DJI_20250319141910_0688_함지원_person05_img01.jpg"
+  },
+  "권태형": {
+    "name": "권태형",
+    "img": "faces/DJI_20250319142440_0691_권태형_person03_img01.jpg"
+  },
+  "하경완": {
+    "name": "하경완",
+    "img": "faces/DJI_20250319142244_0690_하경완_person01_img01.jpg"
+  },
+  "박상현": {
+    "name": "박상현",
+    "img": "faces/DJI_20250319145205_0699_박상현_person10_img01.jpg"
+  },
+  "이동하": {
+    "name": "이동하",
+    "img": "faces/DJI_20250319152609_0703_이동하_person03_img01.jpg"
+  },
+  "강신혁": {
+    "name": "강신혁",
+    "img": "faces/DJI_20250319142128_0689_강신혁_person01_img01.jpg"
+  },
+  "심현우": {
+    "name": "심현우",
+    "img": "faces/DJI_20250319152814_0704_심현우_person07_img01.jpg"
+  },
+  "박준서": {
+    "name": "박준서",
+    "img": "https://via.placeholder.com/100/FF6B00/FFFFFF?text=박"
+  },
+  "서예나": {
+    "name": "서예나",
+    "img": "faces/DJI_20250319150217_0702_서예나_person08_img01.jpg"
+  },
+  "이혜원": {
+    "name": "이혜원",
+    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=이"
+  }
+}

@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEIU Creative Collection</title>
+    <!-- Include egjs-flicking CSS from CDNJS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.css">
+
+    <style>
+        :root {
+            --primary-color: #ff4d00;
+            /* JEIU Orangeish */
+            --text-color: #ffffff;
+            --bg-color: #0a0a0a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            word-break: keep-all;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* --- 1. Background & Effects --- */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        /* Dithering/Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- 2. Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-top {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 5rem;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .brand-tag {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .jeiu-logo {
+            width: 280px;
+            height: auto;
+            max-width: 100%;
+            filter: brightness(0) invert(1);
+            transition: transform 0.3s ease;
+        }
+
+        .jeiu-logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Archive Menu */
+        .archive-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .archive-selector {
+            position: relative;
+            display: inline-block;
+        }
+
+        .archive-button {
+            background: rgba(255, 77, 0, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .archive-button:hover {
+            background: rgba(255, 77, 0, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .archive-button::after {
+            content: "▼";
+            font-size: 0.6rem;
+            transition: transform 0.3s ease;
+        }
+
+        .archive-button.active::after {
+            transform: rotate(180deg);
+        }
+
+        .archive-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            width: 120px;
+            margin-top: 5px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .archive-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .archive-option {
+            padding: 10px 15px;
+            color: #ddd;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .archive-option:hover {
+            background: rgba(255, 77, 0, 0.2);
+            color: white;
+        }
+
+        .archive-option.active {
+            background: rgba(255, 77, 0, 0.3);
+            color: white;
+        }
+
+        /* Tablet styles */
+        @media (max-width: 1024px) {
+            .jeiu-logo {
+                width: 240px;
+            }
+
+            h1 {
+                font-size: 4rem;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 25px;
+            }
+
+            .archive-menu {
+                top: 15px;
+                right: 15px;
+            }
+
+            .archive-button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .archive-option {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .archive-menu {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .archive-button {
+                background: rgba(255, 77, 0, 0.2);
+                padding: 8px 15px;
+            }
+        }
+
+        /* Medium tablet styles */
+        @media (max-width: 992px) {
+            .card-image {
+                height: 160px;
+            }
+
+            .card-image img {
+                height: 160px;
+            }
+        }
+
+        /* --- 3. Gallery Grid --- */
+        .gallery-section {
+            padding: 100px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #ff4d00, #ff8c00);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            z-index: 1;
+        }
+
+        .card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card-team {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .card-presenters {
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .card-presenters .label {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .card-team-members {
+            margin-bottom: 3rem;
+        }
+
+        .card-team-members h4 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
+
+        .team-carousel {
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            height: 140px;
+            /* Fixed height for the carousel */
+        }
+
+        .flicking-viewport {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .flicking-camera {
+            display: flex;
+            height: 100%;
+            min-width: max-content;
+        }
+
+        .flicking-panel {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            cursor: grab;
+            user-select: none;
+
+            border-radius: 8px;
+            margin: 0 4px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 
+        .flicking-panel:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 77, 0, 0.3);
+        }
+
+        .flicking-panel:active {
+            cursor: grabbing;
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.98);
+        } */
+
+        .carousel-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 2px solid var(--primary-color);
+        }
+
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .member-name {
+            font-size: 0.85rem;
+            text-align: center;
+            color: #ddd;
+        }
+
+        .card-links {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: inline-block;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff6a00;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px 0;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            header {
+                height: 70vh;
+                align-items: center;
+                text-align: center;
+            }
+
+            .header-content {
+                align-items: center;
+                text-align: center;
+            }
+
+            .header-top {
+                justify-content: flex-end;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .jeiu-logo {
+                width: 200px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                text-align: center;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+                text-align: center;
+                max-width: 100%;
+            }
+
+            .gallery-section {
+                padding: 60px 0;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .card {
+                border-radius: 8px;
+            }
+
+            .card-image {
+                height: 150px;
+            }
+
+            .card-image img {
+                height: 150px;
+            }
+
+            .card-content {
+                padding: 15px;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            .card-team {
+                font-size: 0.85rem;
+            }
+
+            .card-description {
+                font-size: 0.85rem;
+            }
+
+            .card-presenters {
+                font-size: 0.8rem;
+            }
+
+            .member-avatar {
+                width: 70px;
+                height: 70px;
+            }
+
+            .card-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn {
+                text-align: center;
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            footer {
+                padding: 30px 0;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                height: 60vh;
+            }
+
+            .jeiu-logo {
+                width: 160px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .brand-tag {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+            }
+
+            .card-image {
+                height: 120px;
+            }
+
+            .card-image img {
+                height: 120px;
+            }
+
+            .card-content {
+                padding: 12px;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .card-team {
+                font-size: 0.8rem;
+            }
+
+            .card-description {
+                font-size: 0.8rem;
+            }
+
+            .card-presenters {
+                font-size: 0.75rem;
+            }
+
+            .member-avatar {
+                width: 60px;
+                height: 60px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #222;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            width: 85%;
+            max-width: 800px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close:hover {
+            background-color: rgba(255, 77, 0, 0.7);
+        }
+
+        #video-frame {
+            border-radius: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+
+            .close {
+                top: 5px;
+                right: 10px;
+                font-size: 24px;
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- WebGL Canvas Background -->
+    <div id="canvas-container">
+        <canvas id="glCanvas"></canvas>
+    </div>
+
+    <!-- Dithering Grain Overlay -->
+    <div class="noise-overlay"></div>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="archive-menu">
+                        <div class="archive-selector">
+                            <div class="archive-button" id="archive-button">
+                                <span class="archive-label">2025</span>
+                            </div>
+                            <div class="archive-dropdown" id="archive-dropdown">
+                                <div class="archive-option active" data-year="2025">2025</div>
+                                <div class="archive-option" data-year="2024">2024</div>
+                                <div class="archive-option" data-year="2023">2023</div>
+                                <div class="archive-option" data-year="2022">2022</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="logo-container">
+                    <img src="jeiu-logo.svg" alt="JEIU Logo" class="jeiu-logo">
+                </div>
+                <span class="brand-tag">Creative Collection</span>
+                <h1>Computer Software<br>Graduation Projects</h1>
+                <p class="subtitle">
+                    재능대학교 컴퓨터소프트웨어학과 졸업작품 아카이브.<br>
+                    학생들의 열정과 기술이 담긴 프로젝트들을 영구히 기록합니다.
+                </p>
+            </div>
+        </header>
+
+        <section class="gallery-section">
+            <div class="grid" id="project-grid">
+                <!-- JS로 카드가 여기에 동적으로 생성됩니다 -->
+            </div>
+        </section>
+
+        <!-- Modal for Video Embed -->
+        <div id="video-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-modal">&times;</span>
+                <iframe id="video-frame" width="100%" height="400" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 JEIU University Computer Software Dept. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        /* --- 1. Load Student Data --- */
+        async function loadStudentData() {
+            try {
+                const response = await fetch('students.json');
+                return await response.json();
+            } catch (error) {
+                console.error('Error loading students.json:', error);
+                return {};
+            }
+        }
+
+        /* --- 2. Load Project Data from data.json --- */
+        async function loadProjectData(studentData, year = '2025') {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+
+                // Add year information to each project
+                let allProjects = [];
+                Object.keys(data).forEach(className => {
+                    data[className].forEach(team => {
+                        // Map team members to include image data
+                        const teamMembersWithImages = team['조원'].map(memberName => {
+                            const studentInfo = studentData[memberName] || {};
+                            let imgPath = studentInfo.img || `https://via.placeholder.com/100/444444/FFFFFF?text=?`;
+
+                            // If the image is not a placeholder URL, prepend the relative path
+                            if (!imgPath.startsWith('https://') && !imgPath.startsWith('http://')) {
+                                imgPath = imgPath; // Path is already correct for relative access
+                            }
+
+                            return {
+                                name: memberName,
+                                img: imgPath
+                            };
+                        });
+
+                        allProjects.push({
+                            id: team.id,
+                            title: team['조이름'],
+                            teamMembers: team['조원'],
+                            teamMembersWithImages: teamMembersWithImages,
+                            description: team['작품설명'],
+                            platform: team['예상플랫폼'],
+                            presentationVideo: team['발표영상'],
+                            finalPresentationVideo: team['최종발표영상'],
+                            presenters: team['최종발표자'],
+                            panelSubmitted: team['판넬제출여부'],
+                            year: year
+                        });
+                    });
+                });
+
+                return allProjects;
+            } catch (error) {
+                console.error('Error loading data.json:', error);
+                return [];
+            }
+        }
+
+        /* --- 3. Generate Team Cards --- */
+        async function generateTeamCards(year = '2025') {
+            const grid = document.getElementById('project-grid');
+            const studentData = await loadStudentData();
+            const projects = await loadProjectData(studentData, year);
+
+            projects.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                // Format team members for display
+                const teamString = project.teamMembers.join(', ');
+
+                // Create card HTML with project details
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="example.webp" alt="${project.title}" onerror="this.onerror=null; this.parentElement.style.background='linear-gradient(135deg, #ff4d00, #ff8c00)'; this.style.display='none';" />
+                        <div class="card-badge">${project.platform}</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3 class="card-title">${project.title}</h3>
+                        </div>
+                        <div class="card-team-members">
+                            <h4>팀원</h4>
+                            <div class="team-carousel flicking-viewport" id="carousel-${project.id}">
+                                <div class="flicking-camera">
+                                    ${project.teamMembersWithImages.map(member => `
+                                        <div class="flicking-panel carousel-panel">
+                                            <div class="member-avatar">
+                                                <img src="${member.img}" alt="${member.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100/444444/FFFFFF?text=?';" />
+                                            </div>
+                                            <div class="member-name">${member.name}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-description">${project.description}</p>
+                        <div class="card-presenters">
+                            <span class="label">발표자:</span>
+                            <span>${project.presenters.join(', ')}</span>
+                        </div>
+                        <div class="card-links">
+                            ${project.presentationVideo ? `<a href="#" class="btn btn-primary embed-video" data-video-url="${project.presentationVideo}">중간 발표 영상</a>` : ''}
+                            ${project.finalPresentationVideo ? `<a href="#" class="btn btn-outline embed-video" data-video-url="${project.finalPresentationVideo}">최종 발표 영상</a>` : ''}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Add event listeners to the embed video buttons
+            document.querySelectorAll('.embed-video').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const videoUrl = this.getAttribute('data-video-url');
+                    const videoId = extractVideoId(videoUrl);
+                    if (videoId) {
+                        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                        document.getElementById('video-frame').src = embedUrl;
+                        document.getElementById('video-modal').style.display = 'block';
+                    }
+                });
+            });
+
+            // Flicking will be initialized after library loads (see bottom of page)
+          
+        }
+
+        // Function to extract YouTube video ID from URL
+        function extractVideoId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // Initialize carousels function
+
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', generateTeamCards);
+
+        // Close modal when close button is clicked
+        document.getElementById('close-modal').addEventListener('click', function () {
+            document.getElementById('video-modal').style.display = 'none';
+            document.getElementById('video-frame').src = '';
+        });
+
+        // Close modal when clicking outside the content
+        window.addEventListener('click', function (event) {
+            const modal = document.getElementById('video-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                document.getElementById('video-frame').src = '';
+            }
+        });
+
+        // Archive menu functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const archiveButton = document.getElementById('archive-button');
+            const archiveDropdown = document.getElementById('archive-dropdown');
+            const archiveOptions = document.querySelectorAll('.archive-option');
+            const archiveLabel = document.querySelector('.archive-label');
+
+            // Toggle dropdown
+            archiveButton.addEventListener('click', function (e) {
+                e.stopPropagation();
+                archiveButton.classList.toggle('active');
+                archiveDropdown.classList.toggle('open');
+            });
+
+            // Handle year selection
+            archiveOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    const selectedYear = this.getAttribute('data-year');
+
+                    // Update active states
+                    document.querySelector('.archive-option.active').classList.remove('active');
+                    this.classList.add('active');
+
+                    // Update button label
+                    archiveLabel.textContent = selectedYear;
+
+                    // Close dropdown
+                    archiveButton.classList.remove('active');
+                    archiveDropdown.classList.remove('open');
+
+                    // Load projects for selected year
+                    generateTeamCards(selectedYear);
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!archiveButton.contains(e.target)) {
+                    archiveButton.classList.remove('active');
+                    archiveDropdown.classList.remove('open');
+                }
+            });
+        });
+        function initFlicking() {
+            document.querySelectorAll('.team-carousel').forEach(carousel => {
+                // 이미 초기화된 경우 방지
+                if (carousel._flickingInstance) return;
+
+                const flick = new eg.Flicking(carousel, {
+                    align: "prev",
+                    circular: false,
+                    moveType: "snap",
+                    horizontal: true,
+                    gap: 10,
+                    adaptive: true,
+                    panelsPerView: window.innerWidth <= 768 ? 2 : 3,
+                    bound: true
+                });
+
+                // 인스턴스 저장
+                carousel._flickingInstance = flick;
+
+                // 반응형 패널 수 변경
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        const newView = window.innerWidth <= 768 ? 2 : 3;
+                        if (flick.panelsPerView !== newView) {
+                            flick.panelsPerView = newView;
+                            flick.resize();
+                        }
+                    }, 200);
+                });
+            });
+        }
+
+        function waitForFlicking() {
+            if (window.eg && eg.Flicking) {
+                initFlicking(); // Flicking 로드됨 → 초기화
+            } else {
+                setTimeout(waitForFlicking, 100); // 아직 → 재시도
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(waitForFlicking, 300); // DOM 생성 후 Flicking 로드 기다림
+        });
+
+
+        /* --- 3. WebGL Shader Implementation (No Libraries) --- */
+        const canvas = document.getElementById("glCanvas");
+        const gl = canvas.getContext("webgl");
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        // Vertex Shader (기본)
+        const vsSource = `
+            attribute vec4 a_position;
+            void main() {
+                gl_Position = a_position;
+            }
+        `;
+
+        // Fragment Shader (예술적 그라디언트)
+        const fsSource = `
+            precision mediump float;
+            uniform vec2 u_resolution;
+            uniform float u_time;
+
+            void main() {
+                vec2 st = gl_FragCoord.xy / u_resolution.xy;
+
+                // 유동적인 움직임을 위한 좌표 변형
+                float t = u_time * 0.5;
+                vec2 pos = st * 3.0;
+
+                float r = sin(pos.x + t) + cos(pos.y + t * 0.5);
+                float g = sin(pos.y - t) + cos(pos.x + t * 0.8);
+                float b = sin(pos.x + pos.y + t);
+
+                // 재능대 오렌지 컬러(#ff4d00) 뉘앙스를 섞음
+                vec3 color = vec3(0.5 + 0.5 * r, 0.2 + 0.3 * g, 0.2 + 0.5 * b);
+
+                // 오렌지 틴트와 어두운 배경 믹스
+                vec3 finalColor = mix(vec3(0.05, 0.05, 0.05), color, 0.3);
+                finalColor = mix(finalColor, vec3(1.0, 0.3, 0.0), 0.1 * sin(u_time));
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+
+        const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+        const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+        const timeUniformLocation = gl.getUniformLocation(program, "u_time");
+
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        // 화면 전체를 덮는 삼각형 두 개 (Quad)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1,
+            1, -1,
+            -1, 1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]), gl.STATIC_DRAW);
+
+        function render(time) {
+            time *= 0.001; // 초 단위로 변환
+
+            gl.useProgram(program);
+
+            gl.enableVertexAttribArray(positionAttributeLocation);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+            gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+            gl.uniform1f(timeUniformLocation, time);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
+    </script>
+    <!-- Include egjs-flicking JS from CDNJS -->
+    <script>
+
+
+        function initFlicking() {
+            document.querySelectorAll('.team-carousel').forEach(carousel => {
+                // 이미 초기화된 경우 방지
+                if (carousel._flickingInstance) return;
+
+                const flick = new eg.Flicking(carousel, {
+                    align: "prev",
+                    circular: false,
+                    moveType: "snap",
+                    horizontal: true,
+                    gap: 10,
+                    adaptive: true,
+                    panelsPerView: window.innerWidth <= 768 ? 2 : 3,
+                    bound: true
+                });
+
+                // 인스턴스 저장
+                carousel._flickingInstance = flick;
+
+                // 반응형 패널 수 변경
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        const newView = window.innerWidth <= 768 ? 2 : 3;
+                        if (flick.panelsPerView !== newView) {
+                            flick.panelsPerView = newView;
+                            flick.resize();
+                        }
+                    }, 200);
+                });
+            });
+        }
+
+        function waitForFlicking() {
+            if (window.eg && eg.Flicking) {
+                initFlicking(); // Flicking 로드됨 → 초기화
+            } else {
+                setTimeout(waitForFlicking, 100); // 아직 → 재시도
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(waitForFlicking, 300); // DOM 생성 후 Flicking 로드 기다림
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.pkgd.min.js"></script>
+
+
+</body>
+
+</html>
