@@ -176,12 +176,14 @@
 
                     card.innerHTML = `
                         <div class="card-image">
-                            <img src="example.webp" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)'">
-                            <div class="card-badge">${p.platform}</div>
+                            <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};}">
                         </div>
 
                         <div class="card-content">
-                            <h3 class="card-title">${p.title}</h3>
+                            <div class="card-title-row">
+                                <h3 class="card-title">${p.title}</h3>
+                                <div class="card-badge">${p.platform}</div>
+                            </div>
 
                             <div class="card-team-members">
                                 <div class="team-carousel flicking-viewport">
