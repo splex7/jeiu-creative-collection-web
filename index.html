@@ -106,6 +106,8 @@
                                 teamMembersWithImages: members,
                                 class: classType,
                                 deploymentUrl: team["최종배포 URL"] || "",
+                                interimDocUrl: team["중간발표자료"] || "",
+                                finalDocUrl: team["최종발표자료"] || "",
                                 year
                             });
                         });
@@ -132,7 +134,7 @@
 
                     card.innerHTML = `
                         <div class="card-image">
-                            <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};}; this.classList.add('grayscale-filter');">
+                            <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
                             <img src="img/${p.id}r.jpg" onerror="this.style.display='none';" class="kenburns-image">
                         </div>
 
@@ -162,7 +164,7 @@
 
                             <p class="card-description">${p.description}</p>
                             <div class="card-links">
-                                ${(p.presentationVideo || p.finalPresentationVideo) ? `<a href="#" class="embed-video card-link" data-interim-url="${p.presentationVideo || ''}" data-final-url="${p.finalPresentationVideo || ''}" data-title="${p.title}">영상 보기</a>` : ""}
+                                ${(p.presentationVideo || p.finalPresentationVideo) ? `<a href="#" class="embed-video card-link" data-interim-url="${p.presentationVideo || ''}" data-final-url="${p.finalPresentationVideo || ''}" data-interim-doc-url="${p.interimDocUrl}" data-final-doc-url="${p.finalDocUrl}" data-title="${p.title}">영상 보기</a>` : ""}
                                 ${p.deploymentUrl ? `<a href="${p.deploymentUrl}" target="_blank" rel="noopener" class="card-link deployment-link">바로가기</a>` : ""}
                             </div>
                         </div>
@@ -187,7 +189,9 @@
             let currentVideoData = {
                 interimUrl: '',
                 finalUrl: '',
-                currentType: 'interim'
+                currentType: 'interim',
+                interimDocUrl: '',
+                finalDocUrl: ''
             };
 
             function extractVideoId(url) {
@@ -200,6 +204,8 @@
                 const tabs = document.querySelectorAll('.tab-button');
                 const modal = document.getElementById('video-modal');
                 const videoFrame = document.getElementById('video-frame');
+                const docLink = document.getElementById('doc-link');
+                const docButtonContainer = document.querySelector('.doc-button-container');
 
                 // Update tab active states
                 tabs.forEach(tab => {
@@ -213,12 +219,33 @@
                 // Update current type and load video
                 currentVideoData.currentType = type;
                 const videoUrl = type === 'interim' ? currentVideoData.interimUrl : currentVideoData.finalUrl;
+                const docUrl = type === 'interim' ? currentVideoData.interimDocUrl : currentVideoData.finalDocUrl;
 
+                // Load video
                 if (videoUrl) {
                     const videoId = extractVideoId(videoUrl);
                     if (videoId) {
                         videoFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                        videoFrame.style.display = 'block';
+                    } else {
+                        videoFrame.style.display = 'none';
                     }
+                } else {
+                    videoFrame.style.display = 'none';
+                }
+
+                // Handle document
+                if (docUrl) {
+                    docLink.href = docUrl;
+                    docLink.textContent = type === 'interim' ? '중간발표자료 보기' : '최종발표자료 보기';
+                    docLink.style.pointerEvents = 'auto';
+                    docLink.style.opacity = '1';
+                    docButtonContainer.style.display = 'block';
+                } else {
+                    docLink.textContent = type === 'interim' ? '중간발표자료 보기' : '최종발표자료 보기';
+                    docLink.style.pointerEvents = 'none';
+                    docLink.style.opacity = '0.5';
+                    docButtonContainer.style.display = 'block';
                 }
             }
 
@@ -230,6 +257,8 @@
                         // Store video data
                         currentVideoData.interimUrl = btn.dataset.interimUrl;
                         currentVideoData.finalUrl = btn.dataset.finalUrl;
+                        currentVideoData.interimDocUrl = btn.dataset.interimDocUrl || '';
+                        currentVideoData.finalDocUrl = btn.dataset.finalDocUrl || '';
 
                         // Reset to interim tab initially
                         currentVideoData.currentType = 'interim';
@@ -372,6 +401,9 @@
                 <span class="close" id="close-modal">&times;</span>
                 <div class="video-container">
                     <iframe id="video-frame" width="100%" height="400" allowfullscreen></iframe>
+                </div>
+                <div class="doc-button-container">
+                    <a id="doc-link" href="#" target="_blank" rel="noopener" class="doc-button">발표자료 보기</a>
                 </div>
                 <div class="video-tabs" id="video-tabs">
                     <button class="tab-button active" data-video-type="interim">중간발표</button>

@@ -864,6 +864,37 @@ footer {
     border-radius: 12px;
 }
 
+.doc-button-container {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.doc-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 77, 0, 0.3);
+}
+
+.doc-button:hover:not(:disabled) {
+    background: #ff6a00;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 77, 0, 0.4);
+}
+
+.doc-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .video-tabs {
     display: flex;
     border-top: 1px solid var(--card-border);
