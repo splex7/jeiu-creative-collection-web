@@ -132,6 +132,7 @@
                     card.innerHTML = `
                         <div class="card-image">
                             <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};}; this.classList.add('grayscale-filter');">
+                            <img src="img/${p.id}r.jpg" onerror="this.style.display='none';" class="kenburns-image">
                         </div>
 
                         <div class="card-content">
