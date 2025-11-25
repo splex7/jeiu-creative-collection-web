@@ -375,30 +375,43 @@
                 
                 // 기기별 중복 클릭 방지 확인
                 const storageKey = `heart_clicked_${cardId}`;
-                if (localStorage.getItem(storageKey)) {
-                    return; // 이미 클릭한 경우
-                }
+                const isAlreadyClicked = localStorage.getItem(storageKey);
                 
                 try {
                     const heartRef = database.ref(`hearts/${cardId}`);
                     
                     const snapshot = await heartRef.once('value');
                     const currentCount = snapshot.val() || 0;
-                    const newCount = currentCount + 1;
                     
-                    await heartRef.set(newCount);
-                    
-                    // 클릭 기록 저장 (영구 저장)
-                    localStorage.setItem(storageKey, 'true');
-                    
-                    // 하트 버튼 비활성화 시각적 표시
-                    const cardImage = document.querySelector(`[data-card-id="${cardId}"]`);
-                    if (cardImage) {
-                        cardImage.classList.add('heart-clicked');
+                    if (isAlreadyClicked) {
+                        // 이미 클릭한 경우 - 하트 취소
+                        if (currentCount > 0) {
+                            await heartRef.set(currentCount - 1);
+                        }
+                        localStorage.removeItem(storageKey);
+                        
+                        // 하트 버튼 활성화 시각적 표시
+                        const cardImage = document.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardImage) {
+                            cardImage.classList.remove('heart-clicked');
+                        }
+                    } else {
+                        // 처음 클릭한 경우 - 하트 추가
+                        const newCount = currentCount + 1;
+                        await heartRef.set(newCount);
+                        
+                        // 클릭 기록 저장 (영구 저장)
+                        localStorage.setItem(storageKey, 'true');
+                        
+                        // 하트 버튼 비활성화 시각적 표시
+                        const cardImage = document.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardImage) {
+                            cardImage.classList.add('heart-clicked');
+                        }
                     }
                     
                 } catch (error) {
-                    console.error('하트 카운트 증가 실패:', error);
+                    console.error('하트 카운트 변경 실패:', error);
                 }
             }
 
