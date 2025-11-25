@@ -352,7 +352,17 @@ h3 {
     border-radius: 4px;
     font-size: 0.75rem;
     white-space: nowrap;
-    margin-left: 10px;
+}
+
+.card-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.class-badge {
+    color: white;
 }
 
 .card-team {

@@ -84,13 +84,16 @@
 
                     let all = [];
 
-                    Object.values(data).forEach(list => {
+                    Object.entries(data).forEach(([className, list]) => {
                         list.forEach(team => {
                             const members = team["조원"].map(n => ({
                                 name: n,
                                 img: (studentData[n]?.img) ??
                                     "https://via.placeholder.com/100/444444/FFFFFF?text=?"
                             }));
+
+                            // id에서 반 정보 추출 (team_a_01 -> A반, team_b_01 -> B반)
+                            const classType = team.id.includes('team_a_') ? 'A반' : 'B반';
 
                             all.push({
                                 id: team.id,
@@ -101,6 +104,7 @@
                                 finalPresentationVideo: team["최종발표영상"],
                                 presenters: team["최종발표자"],
                                 teamMembersWithImages: members,
+                                class: classType,
                                 year
                             });
                         });
@@ -133,7 +137,10 @@
                         <div class="card-content">
                             <div class="card-title-row">
                                 <h3 class="card-title">${p.title}</h3>
-                                <div class="card-badge">${p.platform}</div>
+                                <div class="card-badges">
+                                    <div class="card-badge">${p.platform}</div>
+                                    <div class="card-badge class-badge">${p.class}</div>
+                                </div>
                             </div>
 
                             <div class="card-team-members">
