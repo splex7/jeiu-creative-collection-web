@@ -499,19 +499,36 @@ h3 {
     margin-top: 1rem;
 }
 
-.embed-video {
+.card-link {
     text-decoration: none;
     padding: 8px 16px;
     border-radius: 4px;
     font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    display: inline-block;
     text-align: center;
     flex: 1;
+    transition: all 0.3s ease;
+}
+
+.embed-video {
+    background: rgba(255, 77, 0, 0.1);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.embed-video:hover {
     background: var(--primary-color);
     color: white;
-    border: 1px solid var(--primary-color);
+}
+
+.deployment-link {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.deployment-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .embed-video:hover {
@@ -701,7 +718,7 @@ footer {
         gap: 8px;
     }
 
-    .embed-video {
+    .card-link {
         text-align: center;
         padding: 10px 16px;
         font-size: 0.9rem;

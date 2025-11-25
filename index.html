@@ -105,6 +105,7 @@
                                 presenters: team["최종발표자"],
                                 teamMembersWithImages: members,
                                 class: classType,
+                                deploymentUrl: team["최종배포 URL"] || "",
                                 year
                             });
                         });
@@ -161,7 +162,8 @@
 
                             <p class="card-description">${p.description}</p>
                             <div class="card-links">
-                                ${(p.presentationVideo || p.finalPresentationVideo) ? `<a href="#" class="embed-video" data-interim-url="${p.presentationVideo || ''}" data-final-url="${p.finalPresentationVideo || ''}" data-title="${p.title}">발표 영상 보기</a>` : ""}
+                                ${(p.presentationVideo || p.finalPresentationVideo) ? `<a href="#" class="embed-video card-link" data-interim-url="${p.presentationVideo || ''}" data-final-url="${p.finalPresentationVideo || ''}" data-title="${p.title}">영상 보기</a>` : ""}
+                                ${p.deploymentUrl ? `<a href="${p.deploymentUrl}" target="_blank" rel="noopener" class="card-link deployment-link">바로가기</a>` : ""}
                             </div>
                         </div>
                     `;
