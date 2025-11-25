@@ -76,7 +76,12 @@
                         adaptive: true,
                         bound: true,
                         panelsPerView: 2.5,
-                        defaultIndex: 1,
+                        defaultIndex: 0,
+                    });
+
+                    // Flicking 이벤트 리스너 추가
+                    flick.on("moveStart", () => {
+                        hideSpeechBubble();
                     });
 
                     carousel._flickingInstance = flick;
@@ -205,6 +210,8 @@
                 setupVideoButtons();
                 setupHeartClickListeners();
                 loadHeartCounts();
+                setupStudentSpeechBubbles();
+                setupExhibitionVideo();
             }
 
 
@@ -369,6 +376,12 @@
                     return;
                 }
                 
+                // 기기별 중복 클릭 방지 확인
+                const storageKey = `heart_clicked_${cardId}`;
+                if (localStorage.getItem(storageKey)) {
+                    return; // 이미 클릭한 경우
+                }
+                
                 try {
                     const heartRef = database.ref(`hearts/${cardId}`);
                     
@@ -377,6 +390,16 @@
                     const newCount = currentCount + 1;
                     
                     await heartRef.set(newCount);
+                    
+                    // 클릭 기록 저장 (영구 저장)
+                    localStorage.setItem(storageKey, 'true');
+                    
+                    // 하트 버튼 비활성화 시각적 표시
+                    const cardImage = document.querySelector(`[data-card-id="${cardId}"]`);
+                    if (cardImage) {
+                        cardImage.classList.add('heart-clicked');
+                    }
+                    
                 } catch (error) {
                     console.error('하트 카운트 증가 실패:', error);
                 }
@@ -393,6 +416,14 @@
                             const heartNumber = cardImage.querySelector('.heart-number');
                             if (heartNumber) {
                                 heartNumber.textContent = heartsData[cardId] || 0;
+                            }
+                            
+                            // 기기별 클릭 상태 확인 및 시각적 표시
+                            const storageKey = `heart_clicked_${cardId}`;
+                            if (localStorage.getItem(storageKey)) {
+                                cardImage.classList.add('heart-clicked');
+                            } else {
+                                cardImage.classList.remove('heart-clicked');
                             }
                         });
                     });
@@ -437,6 +468,166 @@
                         incrementHeartCount(cardId);
                     });
                 });
+            }
+
+            function setupStudentSpeechBubbles() {
+                let currentBubble = null;
+                let hideTimeout = null;
+
+                // 전역 함수로 hideSpeechBubble 노출
+                window.hideSpeechBubble = hideSpeechBubble;
+
+                // Flicking이 초기화된 후에 이벤트 리스너 설정
+                setTimeout(() => {
+                    document.querySelectorAll('.member-avatar').forEach(avatar => {
+                        // mousedown 이벤트로 변경
+                        avatar.addEventListener('mousedown', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            const memberName = this.parentElement.querySelector('.member-name').textContent;
+                            showSpeechBubble(this, memberName);
+                        });
+
+                        // 터치 이벤트도 추가 (모바일 대응)
+                        avatar.addEventListener('touchstart', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            const memberName = this.parentElement.querySelector('.member-name').textContent;
+                            showSpeechBubble(this, memberName);
+                        });
+                    });
+                }, 500); // Flicking 초기화 대기
+
+                function showSpeechBubble(element, studentName) {
+                    // 기존 말풍선 제거
+                    if (currentBubble) {
+                        currentBubble.remove();
+                    }
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                    }
+
+                    // 학생 데이터 로드
+                    loadStudentData().then(students => {
+                        const studentData = students[studentName];
+                        const message = studentData?.소감 || "후회없는 캡스톤이었어!";
+                        
+                        // 말풍선 생성
+                        const bubble = document.createElement('div');
+                        bubble.className = 'speech-bubble';
+                        bubble.textContent = message;
+                        
+                        // 위치 설정 - element 기준 상대 위치로 변경
+                        bubble.style.position = 'fixed';
+                        
+                        const rect = element.getBoundingClientRect();
+                        const bubbleWidth = 200; // 최대 너비
+                        const bubbleLeft = rect.left + (rect.width / 2) - (bubbleWidth / 2);
+                        const bubbleTop = rect.top - 60; // 말풍선 높이 + 여백
+                        
+                        bubble.style.left = bubbleLeft + 'px';
+                        bubble.style.top = bubbleTop + 'px';
+                        bubble.style.width = bubbleWidth + 'px';
+                        
+                        // 화면 경계 체크
+                        const screenWidth = window.innerWidth;
+                        const screenHeight = window.innerHeight;
+                        
+                        if (bubbleLeft < 10) {
+                            bubble.style.left = '10px';
+                        } else if (bubbleLeft + bubbleWidth > screenWidth - 10) {
+                            bubble.style.left = (screenWidth - bubbleWidth - 10) + 'px';
+                        }
+                        
+                        if (bubbleTop < 10) {
+                            bubble.style.top = (rect.bottom + 10) + 'px'; // 위에 공간이 없으면 아래로
+                        }
+                        
+                        document.body.appendChild(bubble);
+                        
+                        // 애니메이션 적용
+                        setTimeout(() => {
+                            bubble.classList.add('show');
+                        }, 10);
+                        
+                        currentBubble = bubble;
+                        
+                        // 3초 후 자동 숨김
+                        hideTimeout = setTimeout(() => {
+                            hideSpeechBubble();
+                        }, 3000);
+                    });
+                }
+
+                function hideSpeechBubble() {
+                    if (currentBubble) {
+                        currentBubble.classList.remove('show');
+                        setTimeout(() => {
+                            if (currentBubble) {
+                                currentBubble.remove();
+                                currentBubble = null;
+                            }
+                        }, 300);
+                    }
+                }
+
+                // 다른 곳 클릭 시 말풍선 숨김
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.member-avatar')) {
+                        hideSpeechBubble();
+                    }
+                });
+
+                document.addEventListener('touchend', function(e) {
+                    if (!e.target.closest('.member-avatar')) {
+                        hideSpeechBubble();
+                    }
+                });
+
+                // 스크롤 시 말풍선 숨김
+                window.addEventListener('scroll', function() {
+                    hideSpeechBubble();
+                });
+
+                // 터치 스크롤 시 말풍선 숨김 (모바일 대응)
+                window.addEventListener('touchmove', function() {
+                    hideSpeechBubble();
+                });
+            }
+
+            /* ------------------------- Exhibition Video ------------------------- */
+            function setupExhibitionVideo() {
+                const exhibitionBtn = document.getElementById('exhibition-video-btn');
+                const exhibitionModal = document.getElementById('exhibition-modal');
+                const exhibitionClose = document.getElementById('close-exhibition-modal');
+                const exhibitionFrame = document.getElementById('exhibition-video-frame');
+                
+                const exhibitionVideoId = '_fo7yEdSQVA';
+                const exhibitionVideoUrl = `https://www.youtube.com/embed/${exhibitionVideoId}?autoplay=1&rel=0&modestbranding=1`;
+
+                exhibitionBtn.addEventListener('click', function() {
+                    exhibitionModal.style.display = 'block';
+                    exhibitionFrame.src = exhibitionVideoUrl;
+                    document.body.style.overflow = 'hidden';
+                });
+
+                exhibitionClose.addEventListener('click', function() {
+                    closeExhibitionModal();
+                });
+
+                exhibitionModal.addEventListener('click', function(e) {
+                    if (e.target === exhibitionModal) {
+                        closeExhibitionModal();
+                    }
+                });
+
+                function closeExhibitionModal() {
+                    exhibitionModal.style.display = 'none';
+                    exhibitionFrame.src = '';
+                    document.body.style.overflow = 'auto';
+                }
             }
 
 
@@ -536,17 +727,39 @@
                 </div>
 
                 <span class="brand-tag">Creative Collection</span>
-                <h2>Computer Software<br>Graduation Projects</h2>
+                <h2>Computer Software<br>Capstone Projects</h2>
                 <p class="subtitle">
                     재능대학교 컴퓨터소프트웨어학과 졸업작품 아카이브.<br>
                     학생들의 열정과 기술이 담긴 프로젝트들을 영구히 기록합니다.
                 </p>
+                
+                <!-- 최종발표현장하이라이트 버튼 -->
+                <button id="exhibition-video-btn" class="exhibition-video-btn">
+                    🎬 최종발표현장하이라이트
+                </button>
             </div>
         </header>
 
         <section class="gallery-section">
             <div class="grid" id="project-grid"></div>
         </section>
+
+        <!-- Exhibition Video Modal -->
+        <div id="exhibition-modal" class="exhibition-modal">
+            <div class="exhibition-modal-content">
+                <span class="exhibition-close" id="close-exhibition-modal">&times;</span>
+                <div class="exhibition-video-container">
+                    <iframe id="exhibition-video-frame" 
+                            width="100%" 
+                            height="100%" 
+                            src="" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal -->
         <div id="video-modal" class="modal">
