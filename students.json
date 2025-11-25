@@ -13,11 +13,11 @@
   },
   "박준혁": {
     "name": "박준혁",
-    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=박"
+    "img": "faces/default.jpg"
   },
   "윤지우": {
     "name": "윤지우",
-    "img": "https://via.placeholder.com/100/FFCA00/FFFFFF?text=윤"
+    "img": "faces/default.jpg"
   },
   "김재헌": {
     "name": "김재헌",
@@ -45,7 +45,7 @@
   },
   "오세준": {
     "name": "오세준",
-    "img": "https://via.placeholder.com/100/FF6B00/FFFFFF?text=오"
+    "img": "faces/default.jpg"
   },
   "박성빈": {
     "name": "박성빈",
@@ -53,15 +53,15 @@
   },
   "곽현우": {
     "name": "곽현우",
-    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=곽"
+    "img": "faces/default.jpg"
   },
   "이다영": {
     "name": "이다영",
-    "img": "https://via.placeholder.com/100/FFCA00/FFFFFF?text=이"
+    "img": "faces/default.jpg"
   },
   "유승민": {
     "name": "유승민",
-    "img": "faces/DJI_20250319114723_0684_유승민_person02_img01.jpg"
+    "img": "faces/DJI_20250319115141_0684_유승민_person02_img01.jpg"
   },
   "천규진": {
     "name": "천규진",
@@ -73,7 +73,7 @@
   },
   "김재훈": {
     "name": "김재훈",
-    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=김"
+    "img": "faces/default.jpg"
   },
   "김태연": {
     "name": "김태연",
@@ -81,7 +81,7 @@
   },
   "박민호": {
     "name": "박민호",
-    "img": "https://via.placeholder.com/100/FF4D00/FFFFFF?text=박"
+    "img": "faces/default.jpg"
   },
   "김미리": {
     "name": "김미리",
@@ -145,7 +145,7 @@
   },
   "박준서": {
     "name": "박준서",
-    "img": "https://via.placeholder.com/100/FF6B00/FFFFFF?text=박"
+    "img": "faces/default.jpg"
   },
   "서예나": {
     "name": "서예나",
@@ -153,6 +153,6 @@
   },
   "이혜원": {
     "name": "이혜원",
-    "img": "https://via.placeholder.com/100/FFAA00/FFFFFF?text=이"
+    "img": "faces/default.jpg"
   }
 }

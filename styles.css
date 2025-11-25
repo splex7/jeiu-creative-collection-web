@@ -1,0 +1,809 @@
+:root {
+    --primary-color: #ff4d00;
+    /* JEIU Orangeish */
+    --text-color: #ffffff;
+    --bg-color: #0a0a0a;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    word-break: keep-all;
+}
+
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
+
+/* --- 1. Background & Effects --- */
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+}
+
+/* Dithering/Noise Overlay */
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* --- 2. Layout --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: flex-start;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 1rem;
+  
+}
+
+.header-top {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+h1,h2,h3 {
+  
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #fff, #aaa);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+h2 {
+  font-size: clamp(1.4rem, 3vw, 2.0rem);
+}
+h3 {
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.brand-tag {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.logo-container {
+    margin-bottom: 30px;
+}
+
+.jeiu-logo {
+    width: 280px;
+    height: auto;
+    max-width: 100%;
+    filter: brightness(0) invert(1);
+    transition: transform 0.3s ease;
+}
+
+.jeiu-logo:hover {
+    transform: scale(1.05);
+}
+
+/* Archive Menu */
+.archive-menu {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.archive-selector {
+    position: relative;
+    display: inline-block;
+}
+
+.archive-button {
+    background: rgba(255, 77, 0, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.archive-button:hover {
+    background: rgba(255, 77, 0, 0.3);
+    border-color: var(--primary-color);
+}
+
+.archive-button::after {
+    content: "▼";
+    font-size: 0.6rem;
+    transition: transform 0.3s ease;
+}
+
+.archive-button.active::after {
+    transform: rotate(180deg);
+}
+
+.archive-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    width: 120px;
+    margin-top: 5px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.archive-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.archive-option {
+    padding: 10px 15px;
+    color: #ddd;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.archive-option:hover {
+    background: rgba(255, 77, 0, 0.2);
+    color: white;
+}
+
+.archive-option.active {
+    background: rgba(255, 77, 0, 0.3);
+    color: white;
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+    .jeiu-logo {
+        width: 240px;
+    }
+
+    h1 {
+        font-size: 4rem;
+    }
+
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .archive-menu {
+        top: 15px;
+        right: 15px;
+    }
+
+    .archive-button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .archive-option {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .archive-menu {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .archive-button {
+        background: rgba(255, 77, 0, 0.2);
+        padding: 8px 15px;
+    }
+}
+
+/* Medium tablet styles */
+@media (max-width: 992px) {
+    .card-image {
+        height: 160px;
+    }
+
+    .card-image img {
+        height: 160px;
+    }
+}
+
+/* --- 3. Gallery Grid --- */
+.gallery-section {
+    padding: 100px 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+.card-image {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #ff4d00, #ff8c00);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    z-index: 1;
+}
+
+.card-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.card-team {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.card-description {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+.card-presenters {
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.card-presenters .label {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.card-team-members {
+    margin-bottom: 3rem;
+}
+
+.card-team-members h4 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: var(--primary-color);
+}
+
+.team-carousel {
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    height: 140px;
+    /* Fixed height for the carousel */
+}
+
+.flicking-viewport {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+.flicking-camera {
+    display: flex;
+    height: 100%;
+    min-width: max-content;
+}
+
+.flicking-panel {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    cursor: grab;
+    user-select: none;
+
+    border-radius: 8px;
+    margin: 0 4px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.carousel-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+
+}
+
+.member-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 2px solid var(--primary-color);
+}
+
+.member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.member-name {
+    font-size: 0.85rem;
+    text-align: center;
+    color: #ddd;
+    /* add dropshadow for readability */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.card-links {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.embed-video {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-block;
+    text-align: center;
+    flex: 1;
+    background: var(--primary-color);
+    color: white;
+    border: 1px solid var(--primary-color);
+}
+
+.embed-video:hover {
+    background: #ff6a00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 77, 0, 0.3);
+}
+
+.btn {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    display: inline-block;
+    text-align: center;
+    flex: 1;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #ff6a00;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+footer {
+    text-align: center;
+    padding: 50px 0;
+    color: #666;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--card-border);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    header {
+        height: 70vh;
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-content {
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-top {
+        justify-content: flex-end;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .jeiu-logo {
+        width: 200px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        text-align: center;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        text-align: center;
+        max-width: 100%;
+    }
+
+    .gallery-section {
+        padding: 60px 0;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .card-image {
+        height: 150px;
+    }
+
+    .card-image img {
+        height: 150px;
+    }
+
+    .card-content {
+        padding: 15px;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+    }
+
+    .card-team {
+        font-size: 0.85rem;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+    }
+
+    .card-presenters {
+        font-size: 0.8rem;
+    }
+
+    .member-avatar {
+        width: 70px;
+        height: 70px;
+    }
+
+    .card-links {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .embed-video {
+        text-align: center;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        text-align: center;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    footer {
+        padding: 30px 0;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        height: 60vh;
+    }
+
+    .jeiu-logo {
+        width: 160px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .brand-tag {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+
+    .card-image {
+        height: 120px;
+    }
+
+    .card-image img {
+        height: 120px;
+    }
+
+    .card-content {
+        padding: 12px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-team {
+        font-size: 0.8rem;
+    }
+
+    .card-description {
+        font-size: 0.8rem;
+    }
+
+    .card-presenters {
+        font-size: 0.75rem;
+    }
+
+    .member-avatar {
+        width: 60px;
+        height: 60px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #222;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    width: 85%;
+    max-width: 800px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close:hover {
+    background-color: rgba(255, 77, 0, 0.7);
+}
+
+#video-frame {
+    border-radius: 12px;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
+
+.video-tabs {
+    display: flex;
+    border-top: 1px solid var(--card-border);
+    background: rgba(20, 20, 20, 0.5);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+    background: rgba(255, 77, 0, 0.1);
+    color: white;
+}
+
+.tab-button.active {
+    background: rgba(255, 77, 0, 0.2);
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    .close {
+        top: 5px;
+        right: 10px;
+        font-size: 24px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .tab-button {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+}
