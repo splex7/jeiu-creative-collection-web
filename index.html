@@ -4,6 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="재능대학교 컴퓨터소프트웨어학과 졸업작품전">
+<meta name="description" content="재능대학교 컴퓨터소프트웨어학과 학생들의 창의적인 졸업작품을 소개합니다. 소프트웨어 개발, 웹, 모바일, 게임, AI 프로젝트까지 다양한 작품을 감상하세요.">
+<meta name="keywords" content="재능대학교, 컴퓨터소프트웨어학과, 졸업작품전, 졸업전시회, 소프트웨어 개발, 웹 개발, 모바일 앱, 게임 개발, AI 프로젝트, 포트폴리오, 전시회">
+<meta name="author" content="재능대학교 컴퓨터소프트웨어학과">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="재능대학교 컴퓨터소프트웨어학과 졸업작품전">
+<meta property="og:description" content="재능대학교 컴퓨터소프트웨어학과 학생들의 소프트웨어·웹·모바일·AI 작품을 한눈에 확인하세요.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jeiu.cc">
+<meta property="og:image" content="https://jeiu.cc/thumbnail.jpg">
+<meta property="og:site_name" content="재능대학교 컴퓨터소프트웨어학과 졸업작품전">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="재능대학교 컴퓨터소프트웨어학과 졸업작품전">
+<meta name="twitter:description" content="재능대학교 컴퓨터소프트웨어학과 졸업작품을 만나보세요.">
+<meta name="twitter:image" content="https://jeiu.cc/thumbnail.jpg">
+<link rel="canonical" href="https://jeiu.cc">
+<meta name="theme-color" content="#5A4FCF">
+
+
+
     <title>JEIU Creative Collection</title>
 
     <!-- Flicking CSS -->
@@ -17,85 +37,11 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <script>
-        const flickScript = document.createElement("script");
-        flickScript.src = "https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.pkgd.min.js";
-
-        flickScript.onload = () => {
-            console.log("Flicking loaded!");
-            startApp(); // 🔥 모든 JS 실행은 여기서만 시작
-        };
-
-        document.head.appendChild(flickScript);
-    </script>
-</head>
-
-<body>
-
-    <!-- WebGL Canvas Background -->
-    <div id="canvas-container">
-        <canvas id="glCanvas"></canvas>
-    </div>
-
-    <!-- Grain Overlay -->
-    <div class="noise-overlay"></div>
-
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <div class="header-top">
-                    <div class="archive-menu">
-                        <div class="archive-selector">
-                            <div class="archive-button" id="archive-button">
-                                <span class="archive-label">2025</span>
-                            </div>
-                            <div class="archive-dropdown" id="archive-dropdown">
-                                <div class="archive-option active" data-year="2025">2025</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="logo-container">
-                    <img src="jeiu-logo.svg" class="jeiu-logo">
-                </div>
-
-                <span class="brand-tag">Creative Collection</span>
-                <h2>Computer Software<br>Graduation Projects</h2>
-                <p class="subtitle">
-                    재능대학교 컴퓨터소프트웨어학과 졸업작품 아카이브.<br>
-                    학생들의 열정과 기술이 담긴 프로젝트들을 영구히 기록합니다.
-                </p>
-            </div>
-        </header>
-
-        <section class="gallery-section">
-            <div class="grid" id="project-grid"></div>
-        </section>
-
-        <!-- Modal -->
-        <div id="video-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" id="close-modal">&times;</span>
-                <div class="video-container">
-                    <iframe id="video-frame" width="100%" height="400" allowfullscreen></iframe>
-                </div>
-                <div class="video-tabs" id="video-tabs">
-                    <button class="tab-button active" data-video-type="interim">중간발표</button>
-                    <button class="tab-button" data-video-type="final">최종발표</button>
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <p>&copy; 2025 JEIU University Computer Software Dept. All rights reserved.</p>
-        </footer>
-    </div>
-
-    <!-- ===============================================================
-         Flicking 로드 후에만 실행되는 전체 기능 startApp()
-    ================================================================ -->
-    <script>
+        // Define startApp immediately to prevent race condition
+        let startAppCalled = false;
         function startApp() {
+            if (startAppCalled) return;
+            startAppCalled = true;
 
             /* ------------------------------------------------------------
                 Flicking 초기화 (Flicking 로드 이후이므로 eg 100% 존재)
@@ -180,7 +126,7 @@
 
                     card.innerHTML = `
                         <div class="card-image">
-                            <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};}">
+                            <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};}; this.classList.add('grayscale-filter');">
                         </div>
 
                         <div class="card-content">
@@ -213,6 +159,13 @@
 
                     grid.appendChild(card);
                 });
+
+                // 카드 셔플 (모든 append 완료 후)
+                const cards = Array.from(grid.children);
+                for (let i = cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    grid.appendChild(cards[j]);
+                }
 
                 initFlicking();
                 setupVideoButtons();
@@ -346,7 +299,88 @@
             setupArchiveMenu();
             generateTeamCards("2025");
         }
+
+        const flickScript = document.createElement("script");
+        flickScript.src = "https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.pkgd.min.js";
+
+        flickScript.onload = () => {
+            console.log("Flicking loaded!");
+            startApp(); // 🔥 모든 JS 실행은 여기서만 시작
+        };
+
+        document.head.appendChild(flickScript);
     </script>
+</head>
+
+<body>
+
+    <!-- WebGL Canvas Background -->
+    <div id="canvas-container">
+        <canvas id="glCanvas"></canvas>
+    </div>
+
+    <!-- Grain Overlay -->
+    <div class="noise-overlay"></div>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="archive-menu">
+                        <div class="archive-selector">
+                            <div class="archive-button" id="archive-button">
+                                <span class="archive-label">2025</span>
+                            </div>
+                            <div class="archive-dropdown" id="archive-dropdown">
+                                <div class="archive-option active" data-year="2025">2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="logo-container">
+                    <img src="jeiu-logo.svg" class="jeiu-logo">
+                </div>
+
+                <span class="brand-tag">Creative Collection</span>
+                <h2>Computer Software<br>Graduation Projects</h2>
+                <p class="subtitle">
+                    재능대학교 컴퓨터소프트웨어학과 졸업작품 아카이브.<br>
+                    학생들의 열정과 기술이 담긴 프로젝트들을 영구히 기록합니다.
+                </p>
+            </div>
+        </header>
+
+        <section class="gallery-section">
+            <div class="grid" id="project-grid"></div>
+        </section>
+
+        <!-- Modal -->
+        <div id="video-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-modal">&times;</span>
+                <div class="video-container">
+                    <iframe id="video-frame" width="100%" height="400" allowfullscreen></iframe>
+                </div>
+                <div class="video-tabs" id="video-tabs">
+                    <button class="tab-button active" data-video-type="interim">중간발표</button>
+                    <button class="tab-button" data-video-type="final">최종발표</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 JEIU University Computer Software Dept. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://www.jeiu.ac.kr" target="_blank" rel="noopener" class="backlink">
+                    <span class="backlink-text">재능대학교 홈페이지</span>
+                    <span class="backlink-url">jeiu.ac.kr</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+    </div>
 
     <!-- Shader Script -->
     <script src="shader.js"></script>
