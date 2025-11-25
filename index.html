@@ -29,6 +29,10 @@
 
     <!-- Flicking CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <link rel="stylesheet" href="styles.css">
     <!-- favicon -->
@@ -38,6 +42,20 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <script>
+        // Firebase 초기화
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7yIunudoV4htLvh7K4zSKXibRM4oquUw",
+            authDomain: "dailyprincess-6c2c2.firebaseapp.com",
+            databaseURL: "https://dailyprincess-6c2c2.firebaseio.com",
+            projectId: "dailyprincess-6c2c2",
+            storageBucket: "dailyprincess-6c2c2.firebasestorage.app",
+            messagingSenderId: "953948313357",
+            appId: "1:953948313357:web:80d229c82c94edc31b4244"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         // Define startApp immediately to prevent race condition
         let startAppCalled = false;
         function startApp() {
@@ -133,9 +151,12 @@
                     card.className = "card";
 
                     card.innerHTML = `
-                        <div class="card-image">
+                        <div class="card-image" data-card-id="${p.id}">
                             <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
                             <img src="img/${p.id}r.jpg" onerror="this.style.display='none';" class="kenburns-image">
+                            <div class="heart-count">
+                                <span>❤️ <span class="heart-number">0</span></span>
+                            </div>
                         </div>
 
                         <div class="card-content">
@@ -182,6 +203,8 @@
 
                 initFlicking();
                 setupVideoButtons();
+                setupHeartClickListeners();
+                loadHeartCounts();
             }
 
 
@@ -298,6 +321,124 @@
                 document.getElementById("video-frame").src = "";
             };
 
+            /* ------------------------- 하트 기능 ------------------------- */
+            let heartClickTimeouts = {};
+
+            function createHeartAnimation(x, y) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-animation';
+                heart.innerHTML = '❤️';
+                heart.style.left = x + 'px';
+                heart.style.top = y + 'px';
+                document.body.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 1500);
+            }
+
+            /* -------------------------- Firebase 연결 확인 -------------------------- */
+            let firebaseConnected = false;
+            let heartFunctionsEnabled = false;
+
+            function checkFirebaseConnection() {
+                const statusElement = document.getElementById('firebase-status');
+                const connectedRef = database.ref('.info/connected');
+                
+                connectedRef.on('value', (snapshot) => {
+                    const connected = snapshot.val();
+                    firebaseConnected = connected;
+                    
+                    if (connected) {
+                        statusElement.textContent = 'connected';
+                        statusElement.className = 'firebase-status connected';
+                        
+                        // 연결되면 하트 기능 활성화
+                        if (!heartFunctionsEnabled) {
+                            heartFunctionsEnabled = true;
+                        }
+                    } else {
+                        statusElement.textContent = 'connecting...';
+                        statusElement.className = 'firebase-status';
+                    }
+                });
+            }
+
+            async function incrementHeartCount(cardId) {
+                if (!firebaseConnected || !heartFunctionsEnabled) {
+                    return;
+                }
+                
+                try {
+                    const heartRef = database.ref(`hearts/${cardId}`);
+                    
+                    const snapshot = await heartRef.once('value');
+                    const currentCount = snapshot.val() || 0;
+                    const newCount = currentCount + 1;
+                    
+                    await heartRef.set(newCount);
+                } catch (error) {
+                    console.error('하트 카운트 증가 실패:', error);
+                }
+            }
+
+            async function loadHeartCounts() {
+                try {
+                    const heartsRef = database.ref('hearts');
+                    heartsRef.on('value', (snapshot) => {
+                        const heartsData = snapshot.val() || {};
+                        
+                        document.querySelectorAll('.card-image').forEach(cardImage => {
+                            const cardId = cardImage.dataset.cardId;
+                            const heartNumber = cardImage.querySelector('.heart-number');
+                            if (heartNumber) {
+                                heartNumber.textContent = heartsData[cardId] || 0;
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('하트 카운트 로드 실패:', error);
+                }
+            }
+
+            function setupHeartClickListeners() {
+                document.querySelectorAll('.card-image').forEach(cardImage => {
+                    cardImage.addEventListener('click', function(e) {
+                        const cardId = this.dataset.cardId;
+                        
+                        // 0.5초 연타 방지
+                        if (heartClickTimeouts[cardId]) {
+                            return;
+                        }
+                        
+                        heartClickTimeouts[cardId] = true;
+                        setTimeout(() => {
+                            delete heartClickTimeouts[cardId];
+                        }, 500);
+                        
+                        // 하트 애니메이션 생성 - 카드 내 상대 위치로 수정
+                        const rect = this.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        
+                        const heart = document.createElement('div');
+                        heart.className = 'heart-animation';
+                        heart.innerHTML = '❤️';
+                        heart.style.left = x + 'px';
+                        heart.style.top = y + 'px';
+                        this.style.position = 'relative';
+                        this.appendChild(heart);
+
+                        setTimeout(() => {
+                            heart.remove();
+                        }, 1500);
+                        
+                        // 하트 카운트 증가
+                        incrementHeartCount(cardId);
+                    });
+                });
+            }
+
 
             /* ------------------------- 연도 선택 메뉴 ------------------------- */
             function setupArchiveMenu() {
@@ -338,6 +479,11 @@
             /* -------------------------- 초기 실행 -------------------------- */
             setupArchiveMenu();
             generateTeamCards("2025");
+            
+            // Firebase 연결 확인 시작
+            setTimeout(() => {
+                checkFirebaseConnection();
+            }, 1000);
         }
 
         const flickScript = document.createElement("script");
@@ -345,7 +491,14 @@
 
         flickScript.onload = () => {
             console.log("Flicking loaded!");
-            startApp(); // 🔥 모든 JS 실행은 여기서만 시작
+            
+            // Firebase가 준비될 때까지 기다렸다가 startApp 실행
+            if (typeof firebase !== 'undefined' && firebase.database()) {
+                console.log("Firebase ready!");
+                startApp();
+            } else {
+                console.error("Firebase not loaded properly");
+            }
         };
 
         document.head.appendChild(flickScript);
@@ -420,6 +573,7 @@
                         <span class="backlink-text">재능대학교 홈페이지</span>
                         <span class="backlink-url">jeiu.ac.kr</span>
                     </a>
+                    <span id="firebase-status" class="firebase-status"></span>
                 </div>
             </div>
         </footer>
