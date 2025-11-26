@@ -1196,6 +1196,7 @@ footer {
     height: auto;
     display: block;
     border-radius: 8px;
+    margin: 0 auto;
 }
 
 .qr-code-text {
@@ -1221,7 +1222,7 @@ footer {
 /* --- Heart Instruction Marquee --- */
 .heart-instruction {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 2rem;
     color: #ff4d00;
     margin: 15px 0;
     padding: 8px 0;
