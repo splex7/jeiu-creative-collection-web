@@ -265,7 +265,6 @@ body::-webkit-scrollbar {
     color: #ff4d00;
 }
 
-/* --- Exhibition Video Button --- */
 /* --- Button Container --- */
 .button-container {
     display: flex;
@@ -277,8 +276,8 @@ body::-webkit-scrollbar {
     flex-wrap: wrap;
 }
 
-.exhibition-video-btn {
-    background: linear-gradient(135deg, #ff4d00, #ff8c00);
+/* --- Common Button Base Style --- */
+.action-btn {
     color: white;
     border: none;
     padding: 12px 24px;
@@ -288,40 +287,44 @@ body::-webkit-scrollbar {
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+/* --- Exhibition Video Button --- */
+.exhibition-video-btn {
+    background: linear-gradient(135deg, #ff4d00, #ff8c00);
     box-shadow: 0 4px 15px rgba(255, 77, 0, 0.3);
 }
 
 .exhibition-video-btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 77, 0, 0.4);
 }
 
-.exhibition-video-btn:active {
-    transform: translateY(0);
+.field-video-btn {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.field-video-btn:hover {
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
 .shuffle-cards-btn {
     background: linear-gradient(135deg, #5A4FCF, #7C3AED);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 0;
-    margin-left: 0;
-    display: inline-block;
+    box-shadow: 0 4px 15px rgba(90, 79, 207, 0.4);
 }
 
 .shuffle-cards-btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(90, 79, 207, 0.4);
-}
-
-.shuffle-cards-btn:active {
-    transform: translateY(0);
 }
 
 /* --- Shuffle Animation --- */
@@ -1426,19 +1429,49 @@ footer {
         font-size: 0.75rem;
     }
 
-    .exhibition-video-btn,
-    .shuffle-cards-btn {
+    .action-btn {
         display: inline-block; /* Changed from block to inline-block */
         width: auto; /* Changed from 100% to auto */
-        margin: 5px 10px; /* Adjust margin for side-by-side layout */
+        margin: 2px 4px; /* Minimize margins */
         flex: 1; /* Allow buttons to share space equally */
-        min-width: 140px; /* Minimum width for readability */
+        min-width: 85px; /* Reduce minimum width */
+        padding: 8px 12px; /* Minimize padding to save space */
+        font-size: 0.85rem; /* Smaller font for space */
+    }
+    
+    /* Make subtitle smaller and hide second paragraph on mobile */
+    .subtitle {
+        font-size: 0.8rem;
+        line-height: 1.2;
+        margin: 10px 0;
+    }
+    
+    .subtitle br {
+        display: none;
+    }
+    
+    .subtitle br + span {
+        display: none;
+    }
+    
+    /* Hide emojis on mobile buttons */
+    .exhibition-video-btn,
+    .field-video-btn,
+    .shuffle-cards-btn {
+        font-size: 0;
+    }
+    
+    .exhibition-video-btn::after,
+    .field-video-btn::after,
+    .shuffle-cards-btn::after {
+        content: attr(data-text);
+        font-size: 0.85rem;
     }
     
     /* Also ensure button container maintains flex layout */
     .button-container {
         flex-wrap: nowrap; /* Prevent wrapping to new line */
-        gap: 10px;
+        gap: 5px; /* Reduce gap between buttons */
     }
 }
 
@@ -1729,9 +1762,8 @@ footer {
 /* --- Heart Instruction Marquee --- */
 .heart-instruction {
     font-weight: 700;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: #ff4d00;
-    margin: 15px 0;
     padding: 8px 0;
     text-shadow: 0 0 10px rgba(255, 77, 0, 0.5);
     animation: pulse 2s ease-in-out infinite;

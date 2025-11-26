@@ -288,7 +288,7 @@
                         gap: 10,
                         adaptive: true,
                         bound: true,
-                        panelsPerView: 2.5,
+                        panelsPerView: 3.5,
                         defaultIndex: 0,
                     });
 
@@ -446,6 +446,7 @@
                 loadHeartCounts();
                 setupStudentSpeechBubbles();
                 setupExhibitionVideo();
+                setupFieldVideo();
                 setupShuffleButton();
                 setupCommentButtonListeners();
                 initializeCommentCounts();
@@ -1431,6 +1432,39 @@
                 }
             }
 
+            /* ------------------------- Field Video ------------------------- */
+            function setupFieldVideo() {
+                const fieldBtn = document.getElementById('field-video-btn');
+                const fieldModal = document.getElementById('field-modal');
+                const fieldClose = document.getElementById('close-field-modal');
+                const fieldFrame = document.getElementById('field-video-frame');
+                
+                const fieldVideoId = 'b8AS-b1fMn4';
+                const fieldVideoUrl = `https://www.youtube.com/embed/${fieldVideoId}?autoplay=1&rel=0&modestbranding=1`;
+
+                fieldBtn.addEventListener('click', function() {
+                    fieldModal.style.display = 'block';
+                    fieldFrame.src = fieldVideoUrl;
+                    document.body.style.overflow = 'hidden';
+                });
+
+                fieldClose.addEventListener('click', function() {
+                    closeFieldModal();
+                });
+
+                fieldModal.addEventListener('click', function(e) {
+                    if (e.target === fieldModal) {
+                        closeFieldModal();
+                    }
+                });
+
+                function closeFieldModal() {
+                    fieldModal.style.display = 'none';
+                    fieldFrame.src = '';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
 
             /* ------------------------- 연도 선택 메뉴 ------------------------- */
             function setupArchiveMenu() {
@@ -1549,13 +1583,18 @@
                 <!-- 버튼 컨테이너 -->
                 <div class="button-container">
                     <!-- 최종발표현장하이라이트 버튼 -->
-                    <button id="exhibition-video-btn" class="exhibition-video-btn">
+                    <button id="exhibition-video-btn" class="action-btn exhibition-video-btn" data-text="최종발표">
                         🎬 최종 발표
                     </button>
                     
+                    <!-- 현장영상 버튼 -->
+                    <button id="field-video-btn" class="action-btn field-video-btn" data-text="현장영상">
+                        📹 현장 영상
+                    </button>
+                    
                     <!-- 셔플 카드 버튼 -->
-                    <button id="shuffle-cards-btn" class="shuffle-cards-btn">
-                        🔀 카드 셔플
+                    <button id="shuffle-cards-btn" class="action-btn shuffle-cards-btn" data-text="카드섞기">
+                        🔀 카드 섞기
                     </button>
                 </div>
             </div>
@@ -1571,6 +1610,23 @@
                 <span class="exhibition-close" id="close-exhibition-modal">&times;</span>
                 <div class="exhibition-video-container">
                     <iframe id="exhibition-video-frame" 
+                            width="100%" 
+                            height="100%" 
+                            src="" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Video Modal -->
+        <div id="field-modal" class="exhibition-modal">
+            <div class="exhibition-modal-content">
+                <span class="exhibition-close" id="close-field-modal">&times;</span>
+                <div class="exhibition-video-container">
+                    <iframe id="field-video-frame" 
                             width="100%" 
                             height="100%" 
                             src="" 
