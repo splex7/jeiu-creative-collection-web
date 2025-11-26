@@ -30,6 +30,10 @@
     <!-- Flicking CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.css">
     
+    <!-- CSS Polyfills -->
+    <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2.4.8/dist/css-vars-ponyfill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/picturefill@3.0.3/dist/picturefill.min.js"></script>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -55,6 +59,18 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+
+        // Initialize CSS polyfills for older browsers
+        if (window.cssVars) {
+            cssVars({
+                watch: true
+            });
+        }
+        
+        // Check for backdrop-filter support
+        if (!CSS.supports('backdrop-filter', 'blur(10px)') && !CSS.supports('-webkit-backdrop-filter', 'blur(10px)')) {
+            document.documentElement.classList.add('no-backdropfilter');
+        }
 
         // Define startApp immediately to prevent race condition
         let startAppCalled = false;

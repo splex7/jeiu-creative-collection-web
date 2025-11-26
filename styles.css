@@ -1144,16 +1144,43 @@ footer {
     top: 80px;
     right: 80px;
     z-index: 1000;
+    background: #ffffff;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
     padding: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: transform 0.3s ease, opacity 0.3s ease;
+    -webkit-transition: -webkit-transform 0.3s ease, opacity 0.3s ease;
+    -moz-transition: -moz-transform 0.3s ease, opacity 0.3s ease;
+    -o-transition: -o-transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+    .qr-code-container {
+        background: #ffffff;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    }
+}
+
+/* Fallback for very old browsers */
+.no-backdropfilter .qr-code-container {
+    background: #f8f8f8;
+    border: 2px solid #e0e0e0;
 }
 
 .qr-code-container:hover {
     transform: scale(1.05);
+    -webkit-transform: scale(1.05);
+    -moz-transform: scale(1.05);
+    -o-transform: scale(1.05);
+    -ms-transform: scale(1.05);
 }
 
 .qr-code-image {
