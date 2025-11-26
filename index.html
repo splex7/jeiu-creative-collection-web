@@ -321,6 +321,18 @@
                     const data = await res.json();
 
                     let all = [];
+                    
+                    // 팀 데이터 저장
+                    teamData = {};
+                    ['a반', 'b반'].forEach(className => {
+                        if (data[className]) {
+                            data[className].forEach(team => {
+                                teamData[team.id] = team["조이름"] || team.id;
+                            });
+                        }
+                    });
+                    
+                    console.log('Team data loaded:', teamData);
 
                     Object.entries(data).forEach(([className, list]) => {
                         list.forEach(team => {
@@ -553,9 +565,8 @@
             function loadComments(cardId) {
                 if (!firebaseConnected) return;
                 
-                // Get teamId for this card
-                const project = currentProjects.find(p => p.cardId === cardId);
-                const teamId = project?.teamId || project?.team || `team_${cardId}`; // Fallback
+                // Use cardId as teamId since each team has one card
+                const teamId = cardId;
                 
                 console.log(`Loading comments for card ${cardId}, teamId: ${teamId}`);
                 
@@ -564,30 +575,28 @@
                     return;
                 }
                 
+                // Clear comments immediately to prevent old comments from showing
+                const commentList = document.getElementById('comment-list');
+                if (commentList) {
+                    commentList.innerHTML = '<div class="no-comments">로딩 중...</div>';
+                }
+                
                 // Clean up previous listener if exists
                 if (window.currentCommentsListener) {
                     window.currentCommentsListener();
                     window.currentCommentsListener = null;
                 }
                 
-                // Query Firestore for comments by teamId
+                // Query Firestore for comments by teamId with real-time listener
                 const commentsRef = db.collection('comments').where('teamId', '==', teamId);
-                commentsRef.get().then((querySnapshot) => {
-                    const comments = {};
-                    querySnapshot.forEach((doc) => {
-                        comments[doc.id] = doc.data();
-                    });
-                    displayComments(comments);
-                }).catch((error) => {
-                    console.error('Error loading comments from Firestore:', error);
-                });
                 
-                // Real-time listener for Firestore
+                // Real-time listener for Firestore (this handles both initial load and updates)
                 const unsubscribe = commentsRef.onSnapshot((querySnapshot) => {
                     const comments = {};
                     querySnapshot.forEach((doc) => {
                         comments[doc.id] = doc.data();
                     });
+                    console.log('Comments updated:', Object.keys(comments).length, 'comments found');
                     displayComments(comments);
                 }, (error) => {
                     console.error('Real-time listener error:', error);
@@ -600,7 +609,17 @@
             // Display comments in the modal
             function displayComments(comments) {
                 const commentList = document.getElementById('comment-list');
-                const commentArray = Object.entries(comments).sort((a, b) => b[1].timestamp - a[1].timestamp);
+                
+                // Filter out soft-deleted comments
+                const activeComments = {};
+                Object.entries(comments).forEach(([commentId, comment]) => {
+                    // Only show comments that are not soft-deleted
+                    if (!comment.deleted) {
+                        activeComments[commentId] = comment;
+                    }
+                });
+                
+                const commentArray = Object.entries(activeComments).sort((a, b) => b[1].timestamp - a[1].timestamp);
                 
                 if (commentArray.length === 0) {
                     commentList.innerHTML = '<div class="no-comments">아직 댓글이 없습니다. 따듯한 응원의 댓글을 남겨주세요!</div>';
@@ -610,17 +629,19 @@
                 commentList.innerHTML = commentArray.map(([commentId, comment]) => {
                     const isOwn = isOwnComment(comment);
                     const deleteButton = isOwn ? `<button class="delete-comment-btn" onclick="deleteComment('${currentCommentCardId}', '${commentId}')">🗑️</button>` : '';
+                    const teamName = teamData[comment.teamId] || comment.teamId || '알 수 없음';
                     
                     return `
                         <div class="comment-item ${isOwn ? 'own-comment' : ''}">
                             <div class="comment-header">
-                                <span class="comment-author">${escapeHtml(comment.name)}</span>
-                                <div class="comment-meta">
-                                    <span class="comment-time">${formatTime(comment.timestamp)}</span>
-                                    ${deleteButton}
+                                <div class="comment-info">
+                                    <span class="comment-name">${escapeHtml(comment.name || '익명')}</span>
+                                    <span class="comment-team">${escapeHtml(teamName)}</span>
+                                    <span class="comment-time">${formatDate(comment.timestamp)}</span>
                                 </div>
+                                ${deleteButton}
                             </div>
-                            <div class="comment-text">${escapeHtml(comment.text)}</div>
+                            <div class="comment-text">${escapeHtml(comment.text || '')}</div>
                         </div>
                     `;
                 }).join('');
@@ -692,12 +713,13 @@
                     timestamp: Date.now(),
                     authorId: generateAuthorId(name), // Add author ID for tracking own comments
                     cardId: currentCommentCardId,
-                    teamId: project?.teamId || project?.team || `team_${currentCommentCardId}` // Fallback
+                    teamId: currentCommentCardId // Use cardId as teamId
                 };
                 
                 // Add to Firestore
                 db.collection('comments').add(comment)
                     .then((docRef) => {
+                        console.log('Comment added with ID:', docRef.id);
                         
                         // Save current name to localStorage
                         const name = nameInput.value.trim();
@@ -706,13 +728,13 @@
                         // Clear form
                         nameInput.value = '';
                         textInput.value = '';
+                        updateCharCount();
                         
-                        // Re-enable button
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '보내기';
+                        // Close modal
+                        closeCommentModal();
                         
-                        // Focus back to name input
-                        nameInput.focus();
+                        // The real-time listener will automatically update the comments
+                        console.log('Comment submitted successfully');
                     })
                     .catch((error) => {
                         console.error('댓글 전송 실패:', error);
@@ -831,22 +853,23 @@
                     
                     querySnapshot.forEach((doc) => {
                         const comment = doc.data();
-                        const teamId = comment.teamId;
-                        
-                        if (!commentsByTeam[teamId]) {
-                            commentsByTeam[teamId] = [];
+                        // Only count active (non-deleted) comments
+                        if (!comment.deleted) {
+                            const teamId = comment.teamId;
+                            
+                            if (!commentsByTeam[teamId]) {
+                                commentsByTeam[teamId] = [];
+                            }
+                            commentsByTeam[teamId].push(comment);
                         }
-                        commentsByTeam[teamId].push(comment);
                     });
                     
                     // Update counts for each card
                     document.querySelectorAll('.comment-count').forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
-                        const project = currentProjects.find(p => p.cardId === cardId);
-                        const teamId = project?.teamId || project?.team || `team_${cardId}`;
                         
-                        if (teamId && commentsByTeam[teamId]) {
-                            const count = commentsByTeam[teamId].length;
+                        if (commentsByTeam[cardId]) {
+                            const count = commentsByTeam[cardId].length;
                             updateCommentCount(cardId, count);
                         } else {
                             updateCommentCount(cardId, 0);
@@ -862,22 +885,23 @@
                     
                     querySnapshot.forEach((doc) => {
                         const comment = doc.data();
-                        const teamId = comment.teamId;
-                        
-                        if (!commentsByTeam[teamId]) {
-                            commentsByTeam[teamId] = [];
+                        // Only count active (non-deleted) comments
+                        if (!comment.deleted) {
+                            const teamId = comment.teamId;
+                            
+                            if (!commentsByTeam[teamId]) {
+                                commentsByTeam[teamId] = [];
+                            }
+                            commentsByTeam[teamId].push(comment);
                         }
-                        commentsByTeam[teamId].push(comment);
                     });
                     
                     // Update counts for each card
                     document.querySelectorAll('.comment-count').forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
-                        const project = currentProjects.find(p => p.cardId === cardId);
-                        const teamId = project?.teamId || project?.team || `team_${cardId}`;
                         
-                        if (teamId && commentsByTeam[teamId]) {
-                            const count = commentsByTeam[teamId].length;
+                        if (commentsByTeam[cardId]) {
+                            const count = commentsByTeam[cardId].length;
                             updateCommentCount(cardId, count);
                         } else {
                             updateCommentCount(cardId, 0);
@@ -903,12 +927,15 @@
                     
                     querySnapshot.forEach((doc) => {
                         const comment = doc.data();
-                        const teamId = comment.teamId;
-                        
-                        if (!commentsByTeam[teamId]) {
-                            commentsByTeam[teamId] = [];
+                        // Only count active (non-deleted) comments
+                        if (!comment.deleted) {
+                            const teamId = comment.teamId;
+                            
+                            if (!commentsByTeam[teamId]) {
+                                commentsByTeam[teamId] = [];
+                            }
+                            commentsByTeam[teamId].push(comment);
                         }
-                        commentsByTeam[teamId].push(comment);
                     });
                     
                     console.log('Comments by team:', commentsByTeam);
@@ -918,13 +945,11 @@
                     
                     commentButtons.forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
-                        const project = currentProjects.find(p => p.cardId === cardId);
-                        const teamId = project?.teamId || project?.team || `team_${cardId}`;
                         
-                        console.log(`Card ${cardId} -> Team ${teamId}`);
+                        console.log(`Card ${cardId}`);
                         
-                        if (teamId && commentsByTeam[teamId]) {
-                            const count = commentsByTeam[teamId].length;
+                        if (commentsByTeam[cardId]) {
+                            const count = commentsByTeam[cardId].length;
                             updateCommentCount(cardId, count);
                             console.log(`Updated count for ${cardId}: ${count}`);
                         } else {
@@ -944,6 +969,45 @@
                 const div = document.createElement('div');
                 div.textContent = text;
                 return div.innerHTML;
+            }
+
+            function formatDate(timestamp) {
+                if (!timestamp) return '알 수 없음';
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = now - date;
+                
+                // 1분 이내: "방금 전"
+                if (diff < 60000) {
+                    return '방금 전';
+                }
+                
+                // 1시간 이내: "X분 전"
+                if (diff < 3600000) {
+                    const minutes = Math.floor(diff / 60000);
+                    return `${minutes}분 전`;
+                }
+                
+                // 24시간 이내: "X시간 전"
+                if (diff < 86400000) {
+                    const hours = Math.floor(diff / 3600000);
+                    return `${hours}시간 전`;
+                }
+                
+                // 7일 이내: "X일 전"
+                if (diff < 604800000) {
+                    const days = Math.floor(diff / 86400000);
+                    return `${days}일 전`;
+                }
+                
+                // 그 외: 날짜 표시
+                return date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
             }
 
             function formatTime(timestamp) {
@@ -1172,6 +1236,8 @@
                 interimDocUrl: '',
                 finalDocUrl: ''
             };
+            
+            let teamData = {}; // 팀 데이터 저장
 
             function extractVideoId(url) {
                 const reg = /^.*(youtu.be\/|v\/|embed\/|watch\?v=)([^#&?]*).*/;
