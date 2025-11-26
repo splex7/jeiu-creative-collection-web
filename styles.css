@@ -541,6 +541,19 @@ body::-webkit-scrollbar {
     font-size: 0.9rem;
 }
 
+.char-count {
+    text-align: right;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: -5px;
+    margin-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+.char-count.warning {
+    color: #ff4d00;
+}
+
 /* --- Emoji Picker --- */
 .emoji-picker {
     margin-top: 8px;

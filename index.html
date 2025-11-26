@@ -64,6 +64,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <link rel="stylesheet" href="styles.css">
     <!-- favicon -->
@@ -86,6 +87,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const db = firebase.firestore();
 
         // Initialize CSS polyfills for older browsers
         if (window.cssVars) {
@@ -539,24 +541,60 @@
                 const modal = document.getElementById('comment-modal');
                 modal.style.display = 'none';
                 currentCommentCardId = null;
+                
+                // Clean up comments listener
+                if (window.currentCommentsListener) {
+                    window.currentCommentsListener();
+                    window.currentCommentsListener = null;
+                }
             }
 
-            // Load comments from Firebase
+            // Load comments from Firestore (new method)
             function loadComments(cardId) {
                 if (!firebaseConnected) return;
                 
-                const commentsRef = database.ref(`comments/${cardId}`);
-                commentsRef.once('value', (snapshot) => {
-                    const comments = snapshot.val() || {};
+                // Get teamId for this card
+                const project = currentProjects.find(p => p.cardId === cardId);
+                const teamId = project?.teamId || project?.team || `team_${cardId}`; // Fallback
+                
+                console.log(`Loading comments for card ${cardId}, teamId: ${teamId}`);
+                
+                if (!teamId) {
+                    console.warn(`No team ID found for card ${cardId}`);
+                    return;
+                }
+                
+                // Clean up previous listener if exists
+                if (window.currentCommentsListener) {
+                    window.currentCommentsListener();
+                    window.currentCommentsListener = null;
+                }
+                
+                // Query Firestore for comments by teamId
+                const commentsRef = db.collection('comments').where('teamId', '==', teamId);
+                commentsRef.get().then((querySnapshot) => {
+                    const comments = {};
+                    querySnapshot.forEach((doc) => {
+                        comments[doc.id] = doc.data();
+                    });
                     displayComments(comments);
+                }).catch((error) => {
+                    console.error('Error loading comments from Firestore:', error);
                 });
                 
-                // Real-time listener
-                commentsRef.on('value', (snapshot) => {
-                    const comments = snapshot.val() || {};
+                // Real-time listener for Firestore
+                const unsubscribe = commentsRef.onSnapshot((querySnapshot) => {
+                    const comments = {};
+                    querySnapshot.forEach((doc) => {
+                        comments[doc.id] = doc.data();
+                    });
                     displayComments(comments);
-                    updateCommentCount(cardId, Object.keys(comments).length);
+                }, (error) => {
+                    console.error('Real-time listener error:', error);
                 });
+                
+                // Store listener reference for cleanup
+                window.currentCommentsListener = unsubscribe;
             }
 
             // Display comments in the modal
@@ -608,16 +646,58 @@
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
                 
+                // Validate required fields
+                if (!name) {
+                    alert('이름을 입력해주세요.');
+                    nameInput.focus();
+                    return;
+                }
+                
+                if (!text) {
+                    alert('댓글 내용을 입력해주세요.');
+                    textInput.focus();
+                    return;
+                }
+                
+                if (name.length < 2) {
+                    alert('이름은 최소 2자 이상 입력해주세요.');
+                    nameInput.focus();
+                    return;
+                }
+                
+                if (text.length < 2) {
+                    alert('댓글은 최소 2자 이상 입력해주세요.');
+                    textInput.focus();
+                    return;
+                }
+                
+                if (name.length > 50) {
+                    alert('이름은 50자 이내로 입력해주세요.');
+                    nameInput.focus();
+                    return;
+                }
+                
+                if (text.length > 500) {
+                    alert('댓글은 500자 이내로 입력해주세요.');
+                    textInput.focus();
+                    return;
+                }
+                
+                // Get project info for teamId
+                const project = currentProjects.find(p => p.cardId === currentCommentCardId);
+                
                 const comment = {
                     name: name,
                     text: text,
                     timestamp: Date.now(),
-                    authorId: generateAuthorId(name) // Add author ID for tracking own comments
+                    authorId: generateAuthorId(name), // Add author ID for tracking own comments
+                    cardId: currentCommentCardId,
+                    teamId: project?.teamId || project?.team || `team_${currentCommentCardId}` // Fallback
                 };
                 
-                const commentsRef = database.ref(`comments/${currentCommentCardId}`);
-                commentsRef.push(comment)
-                    .then((result) => {
+                // Add to Firestore
+                db.collection('comments').add(comment)
+                    .then((docRef) => {
                         
                         // Save current name to localStorage
                         const name = nameInput.value.trim();
@@ -676,7 +756,7 @@
                 return authorId;
             }
 
-            // Delete comment from Firebase
+            // Delete comment from Firestore
             window.deleteComment = function(cardId, commentId) {
                 if (!firebaseConnected) {
                     alert('Firebase에 연결되지 않았습니다.');
@@ -687,8 +767,8 @@
                     return;
                 }
                 
-                const commentRef = database.ref(`comments/${cardId}/${commentId}`);
-                commentRef.remove()
+                const commentRef = db.collection('comments').doc(commentId);
+                commentRef.delete()
                     .then(() => {
                         // Comment deleted successfully
                         // Refresh comments
@@ -698,7 +778,7 @@
                         console.error('Error deleting comment:', error);
                         alert('댓글 삭제에 실패했습니다. 다시 시도해주세요.');
                     });
-            }
+            };
 
             // Check if comment is written by current user
             function isOwnComment(comment) {
@@ -741,54 +821,121 @@
                 }
             }
 
-            // Load all comment counts
+            // Load all comment counts from Firestore
             function loadCommentCounts() {
                 if (!firebaseConnected) return;
                 
-                const commentsRef = database.ref('comments');
-                commentsRef.on('value', (snapshot) => {
-                    const allComments = snapshot.val() || {};
+                // Get all comments from Firestore
+                db.collection('comments').get().then((querySnapshot) => {
+                    const commentsByTeam = {};
                     
+                    querySnapshot.forEach((doc) => {
+                        const comment = doc.data();
+                        const teamId = comment.teamId;
+                        
+                        if (!commentsByTeam[teamId]) {
+                            commentsByTeam[teamId] = [];
+                        }
+                        commentsByTeam[teamId].push(comment);
+                    });
+                    
+                    // Update counts for each card
                     document.querySelectorAll('.comment-count').forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
+                        const project = currentProjects.find(p => p.cardId === cardId);
+                        const teamId = project?.teamId || project?.team || `team_${cardId}`;
                         
-                        const comments = allComments[cardId] || {};
-                        const count = Object.keys(comments).length;
+                        if (teamId && commentsByTeam[teamId]) {
+                            const count = commentsByTeam[teamId].length;
+                            updateCommentCount(cardId, count);
+                        } else {
+                            updateCommentCount(cardId, 0);
+                        }
+                    });
+                }).catch((error) => {
+                    console.error('Error loading comment counts:', error);
+                });
+                
+                // Add real-time listener for comment count updates
+                db.collection('comments').onSnapshot((querySnapshot) => {
+                    const commentsByTeam = {};
+                    
+                    querySnapshot.forEach((doc) => {
+                        const comment = doc.data();
+                        const teamId = comment.teamId;
                         
-                        updateCommentCount(cardId, count);
+                        if (!commentsByTeam[teamId]) {
+                            commentsByTeam[teamId] = [];
+                        }
+                        commentsByTeam[teamId].push(comment);
+                    });
+                    
+                    // Update counts for each card
+                    document.querySelectorAll('.comment-count').forEach(commentBtn => {
+                        const cardId = commentBtn.dataset.cardId;
+                        const project = currentProjects.find(p => p.cardId === cardId);
+                        const teamId = project?.teamId || project?.team || `team_${cardId}`;
+                        
+                        if (teamId && commentsByTeam[teamId]) {
+                            const count = commentsByTeam[teamId].length;
+                            updateCommentCount(cardId, count);
+                        } else {
+                            updateCommentCount(cardId, 0);
+                        }
                     });
                 }, (error) => {
-                    console.error('Error loading comment counts:', error);
+                    console.error('Real-time comment count listener error:', error);
                 });
             }
 
             // Initialize comment counts (separate function for initial load)
             function initializeCommentCounts() {
-                if (!firebaseConnected) {
+                if (!firebaseConnected || currentProjects.length === 0) {
                     setTimeout(initializeCommentCounts, 1000);
                     return;
                 }
                 
+                console.log('Initializing comment counts for', currentProjects.length, 'projects');
+                
                 // First load initial counts
-                const commentsRef = database.ref('comments');
-                commentsRef.once('value', (snapshot) => {
-                    const allComments = snapshot.val() || {};
+                db.collection('comments').get().then((querySnapshot) => {
+                    const commentsByTeam = {};
+                    
+                    querySnapshot.forEach((doc) => {
+                        const comment = doc.data();
+                        const teamId = comment.teamId;
+                        
+                        if (!commentsByTeam[teamId]) {
+                            commentsByTeam[teamId] = [];
+                        }
+                        commentsByTeam[teamId].push(comment);
+                    });
+                    
+                    console.log('Comments by team:', commentsByTeam);
                     
                     const commentButtons = document.querySelectorAll('.comment-count');
+                    console.log('Found comment buttons:', commentButtons.length);
                     
                     commentButtons.forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
+                        const project = currentProjects.find(p => p.cardId === cardId);
+                        const teamId = project?.teamId || project?.team || `team_${cardId}`;
                         
-                        const comments = allComments[cardId] || {};
-                        const count = Object.keys(comments).length;
+                        console.log(`Card ${cardId} -> Team ${teamId}`);
                         
-                        updateCommentCount(cardId, count);
+                        if (teamId && commentsByTeam[teamId]) {
+                            const count = commentsByTeam[teamId].length;
+                            updateCommentCount(cardId, count);
+                            console.log(`Updated count for ${cardId}: ${count}`);
+                        } else {
+                            updateCommentCount(cardId, 0);
+                            console.log(`No comments for ${cardId}, set to 0`);
+                        }
                     });
                     
-                    // Then set up real-time listener
-                    loadCommentCounts();
+                    console.log('Comment counts initialized from Firestore');
                 }).catch((error) => {
-                    console.error('Error loading initial comment counts:', error);
+                    console.error('Error initializing comment counts:', error);
                 });
             }
 
@@ -820,14 +967,49 @@
                 // Submit button
                 document.getElementById('comment-submit').addEventListener('click', submitComment);
                 
-                // Name field change detection
+                // Name field validation and character count
                 document.getElementById('comment-name').addEventListener('input', function() {
                     const name = this.value.trim();
                     localStorage.setItem('currentCommentName', name);
                     
+                    // Update character count
+                    const nameCount = document.getElementById('name-count');
+                    if (nameCount) {
+                        nameCount.textContent = `${name.length}/50`;
+                        if (name.length > 50) {
+                            nameCount.classList.add('warning');
+                        } else {
+                            nameCount.classList.remove('warning');
+                        }
+                    }
+                    
                     // Refresh comments to show/hide delete buttons
                     if (currentCommentCardId) {
                         loadComments(currentCommentCardId);
+                    }
+                });
+                
+                // Text field validation and character count
+                document.getElementById('comment-text').addEventListener('input', function() {
+                    const text = this.value.trim();
+                    
+                    // Update character count
+                    const textCount = document.getElementById('text-count');
+                    if (textCount) {
+                        textCount.textContent = `${text.length}/500`;
+                        if (text.length > 500) {
+                            textCount.classList.add('warning');
+                        } else {
+                            textCount.classList.remove('warning');
+                        }
+                    }
+                });
+                
+                // Enter key handling for name field
+                document.getElementById('comment-name').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('comment-text').focus();
                     }
                 });
                 
@@ -843,10 +1025,20 @@
                     textArea.value = newText;
                     
                     // Set cursor position after emoji
-                    const newCursorPos = start + emoji.length;
-                    textArea.setSelectionRange(newCursorPos, newCursorPos);
                     textArea.focus();
+                    textArea.setSelectionRange(start + emoji.length, start + emoji.length);
+                    
+                    // Trigger input event to update character count
+                    textArea.dispatchEvent(new Event('input'));
                 }
+                
+                // Emoji button click handlers
+                document.querySelectorAll('.emoji-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const emoji = this.dataset.emoji;
+                        insertEmoji(emoji);
+                    });
+                });
                 
                 // Close modal when clicking outside
                 document.getElementById('comment-modal').addEventListener('click', function(e) {
@@ -939,10 +1131,10 @@
 
             // Test Firebase permissions for comments
             function testFirebasePermissions() {
-                if (!firebaseConnected || !database) return;
+                if (!firebaseConnected || !db) return;
                 
                 // Test read permission
-                database.ref('comments').once('value')
+                db.collection('comments').limit(1).get()
                     .then(() => {
                         // Comments read permission: OK
                     })
@@ -950,30 +1142,29 @@
                         console.error('✗ Comments read permission:', error.code, error.message);
                     });
                 
-                // Test writing comments (with a test path)
-                const testPath = `comments/_test/${Date.now()}`;
-                database.ref(testPath).set({
+                // Test writing comments (with a test document)
+                const testDoc = {
                     name: 'test',
                     text: 'test',
-                    timestamp: Date.now()
-                })
-                    .then(() => {
+                    timestamp: Date.now(),
+                    cardId: 'test',
+                    teamId: 'test'
+                };
+                
+                db.collection('comments').add(testDoc)
+                    .then((docRef) => {
                         // Comments write permission: OK
                         // Clean up test data
-                        database.ref(testPath).remove();
+                        docRef.delete();
                     })
                     .catch((error) => {
                         console.error('✗ Comments write permission:', error.code, error.message);
                         
                         if (error.code === 'PERMISSION_DENIED') {
-                            alert('Firebase 댓글 쓰기 권한이 없습니다. Firebase 규칙을 확인해주세요.\nFirebase Console → Realtime Database → Rules에서 comments 경로의 쓰기 권한을 확인하세요.');
+                            alert('Firebase 댓글 쓰기 권한이 없습니다. Firebase 규칙을 확인해주세요.\nFirebase Console → Firestore Database → Rules에서 comments 컬렉션의 쓰기 권한을 확인하세요.');
                         }
                     });
             }
-
-            
-
-            /* ------------------------- 유튜브 모달 ------------------------- */
             let currentVideoData = {
                 interimUrl: '',
                 finalUrl: '',
@@ -1673,8 +1864,10 @@
                 <!-- 댓글 입력창 (1/3) -->
                 <div class="comment-input-container">
                     <div class="comment-input-form">
-                        <input type="text" id="comment-name" placeholder="이름" maxlength="20" class="comment-name-input">
-                        <textarea id="comment-text" placeholder="댓글을 남겨주세요..." maxlength="200" class="comment-text-input"></textarea>
+                        <input type="text" id="comment-name" placeholder="이름 (2-50자)" maxlength="50" class="comment-name-input">
+                        <div class="char-count" id="name-count" style="text-align: right; font-size: 0.8rem; color: #666; margin-top: -5px; margin-bottom: 5px;">0/50</div>
+                        <textarea id="comment-text" placeholder="댓글을 남겨주세요... (2-500자)" maxlength="500" class="comment-text-input"></textarea>
+                        <div class="char-count" id="text-count" style="text-align: right; font-size: 0.8rem; color: #666; margin-top: -5px; margin-bottom: 5px;">0/500</div>
                         
                         <!-- 감정 이모지 선택기 -->
                         <div class="emoji-picker">
