@@ -4,6 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cache Optimization -->
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
+    <meta http-equiv="ETag" content="v1.0">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js" as="script">
+    <link rel="preload" href="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js" as="script">
+    
+    <!-- Preload Critical Images -->
+    <link rel="preload" href="jeiu-logo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="img/team_a_01r.jpg" as="image">
+    <link rel="preload" href="img/team_a_02.jpg" as="image">
+    <link rel="preload" href="img/team_b_06.jpg" as="image">
+    <link rel="preload" href="faces/default.jpg" as="image">
+    
+    <!-- DNS Prefetch for External Resources -->
+    <link rel="dns-prefetch" href="//www.gstatic.com">
+    <link rel="dns-prefetch" href="//firebase.googleapis.com">
+    <link rel="dns-prefetch" href="//www.jeiu.ac.kr">
+    <link rel="dns-prefetch" href="//dept.jeiu.ac.kr">
+    
+    <!-- Preconnect for Critical External Resources -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firebase.googleapis.com" crossorigin>
+    
     <meta name="title" content="재능대학교 컴퓨터소프트웨어학과 졸업작품전">
     <meta name="description"
         content="재능대학교 컴퓨터소프트웨어학과 학생들의 창의적인 졸업작품을 소개합니다. 소프트웨어 개발, 웹, 모바일, 게임, AI 프로젝트까지 다양한 작품을 감상하세요.">
@@ -357,8 +384,8 @@
 
                     card.innerHTML = `
                         <div class="card-image" data-card-id="${p.id}">
-                            <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
-                            <img src="img/${p.id}r.jpg" onerror="this.style.display='none';" class="kenburns-image">
+                            <img src="img/${p.id}.png" loading="lazy" decoding="async" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
+                            <img src="img/${p.id}r.jpg" loading="lazy" decoding="async" onerror="this.style.display='none';" class="kenburns-image">
                             
                             <!-- 좌측 하트 버튼 -->
                             <div class="heart-count">
@@ -386,7 +413,7 @@
                                         ${p.teamMembersWithImages.map(m => `
                                             <div class="flicking-panel carousel-panel">
                                                 <div class="member-avatar">
-                                                    <img src="${m.img}" onerror="this.src='https://via.placeholder.com/100/444444/FFFFFF?text=?'">
+                                                    <img src="${m.img}" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/100/444444/FFFFFF?text=?'">
                                                 </div>
                                                 <div class="member-name">${m.name}</div>
                                             </div>
@@ -423,6 +450,7 @@
                 setupCommentButtonListeners();
                 initializeCommentCounts();
                 setupCommentModal();
+                initializeCacheOptimization(); // Add cache optimization
                 
                 // Test comment button visibility after rendering
                 setTimeout(() => {
@@ -802,41 +830,22 @@
                     }
                 });
                 
-                // Enter key submission in text area
-                document.getElementById('comment-text').addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        submitComment();
-                    }
-                });
-                
-                // Emoji button clicks
-                document.querySelectorAll('.emoji-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const emoji = this.dataset.emoji;
-                        const textArea = document.getElementById('comment-text');
-                        
-                        // Insert emoji at cursor position
-                        const start = textArea.selectionStart;
-                        const end = textArea.selectionEnd;
-                        const text = textArea.value;
-                        
-                        const newText = text.substring(0, start) + emoji + text.substring(end);
-                        textArea.value = newText;
-                        
-                        // Set cursor position after emoji
-                        const newCursorPos = start + emoji.length;
-                        textArea.setSelectionRange(newCursorPos, newCursorPos);
-                        textArea.focus();
-                        
-                        // Add visual feedback
-                        this.style.transform = 'scale(0.9)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 100);
-                    });
-                });
+                // Emoji insertion function
+                function insertEmoji(emoji) {
+                    const textArea = document.getElementById('comment-text');
+                    const start = textArea.selectionStart;
+                    const end = textArea.selectionEnd;
+                    
+                    const text = textArea.value;
+                    
+                    const newText = text.substring(0, start) + emoji + text.substring(end);
+                    textArea.value = newText;
+                    
+                    // Set cursor position after emoji
+                    const newCursorPos = start + emoji.length;
+                    textArea.setSelectionRange(newCursorPos, newCursorPos);
+                    textArea.focus();
+                }
                 
                 // Close modal when clicking outside
                 document.getElementById('comment-modal').addEventListener('click', function(e) {
@@ -847,6 +856,84 @@
                 
                 // Test Firebase permissions
                 testFirebasePermissions();
+            }
+
+            // 이미지 로딩 최적화
+            function optimizeImageLoading() {
+                // Intersection Observer for lazy loading
+                if ('IntersectionObserver' in window) {
+                    const imageObserver = new IntersectionObserver((entries, observer) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                img.classList.add('loaded');
+                                observer.unobserve(img);
+                            }
+                        });
+                    }, {
+                        rootMargin: '50px 0px',
+                        threshold: 0.01
+                    });
+
+                    // Observe all lazy loaded images
+                    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+                        imageObserver.observe(img);
+                    });
+                }
+
+                // Preload critical images on hover
+                document.querySelectorAll('.card').forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        const images = this.querySelectorAll('img[loading="lazy"]');
+                        images.forEach(img => {
+                            if (!img.complete) {
+                                const src = img.src;
+                                img.src = '';
+                                img.src = src; // Force reload
+                            }
+                        });
+                    });
+                });
+            }
+
+            // 이미지 에러 핸들링 개선
+            function setupImageErrorHandling() {
+                document.querySelectorAll('img').forEach(img => {
+                    img.addEventListener('error', function() {
+                        // Add retry mechanism
+                        if (!this.dataset.retryCount) {
+                            this.dataset.retryCount = '0';
+                        }
+                        
+                        const retryCount = parseInt(this.dataset.retryCount);
+                        if (retryCount < 3) {
+                            this.dataset.retryCount = (retryCount + 1).toString();
+                            setTimeout(() => {
+                                const src = this.src;
+                                this.src = '';
+                                this.src = src;
+                            }, 1000 * retryCount);
+                        } else {
+                            // Final fallback
+                            this.style.display = 'none';
+                            const parent = this.parentElement;
+                            if (parent) {
+                                parent.style.background = 'linear-gradient(135deg,#ff4d00,#ff8c00)';
+                            }
+                        }
+                    });
+                });
+            }
+
+            // 캐시 최적화 초기화
+            function initializeCacheOptimization() {
+                optimizeImageLoading();
+                setupImageErrorHandling();
+                
+                // Service Worker 등록 (나중에 추가 가능)
+                if ('serviceWorker' in navigator) {
+                    // Service Worker 등록 코드는 나중에 추가
+                }
             }
 
             // Test Firebase permissions for comments
@@ -1415,7 +1502,7 @@
 
     <!-- QR Code (Desktop Only) -->
     <div class="qr-code-container">
-        <img src="img/qrcodes.png" alt="QR Codes" class="qr-code-image">
+        <img src="img/qrcodes.png" loading="lazy" decoding="async" alt="QR Codes" class="qr-code-image">
         <div class="qr-code-text">
             <div class="qr-code-url">JEIU.CC</div>
             <div class="qr-code-instruction">모바일로</br>접속해주세요</div>

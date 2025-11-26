@@ -624,6 +624,42 @@ body::-webkit-scrollbar {
     font-style: italic;
 }
 
+/* --- Image Optimization --- */
+img {
+    max-width: 100%;
+    height: auto;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Critical images - no lazy loading */
+img:not([loading]) {
+    image-rendering: auto;
+}
+
+/* Placeholder for lazy loading */
+img[loading="lazy"] {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Image fade-in effect */
+img[loading="lazy"].loaded {
+    animation: fade-in 0.3s ease-in;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* --- Student Speech Bubble --- */
 .speech-bubble {
     position: absolute;
