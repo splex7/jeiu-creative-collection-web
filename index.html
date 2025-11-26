@@ -72,11 +72,188 @@
             document.documentElement.classList.add('no-backdropfilter');
         }
 
+        // Browser detection and fallbacks
+        function detectBrowser() {
+            const userAgent = navigator.userAgent;
+            const isIE = userAgent.indexOf('MSIE') !== -1 || userAgent.indexOf('Trident/') !== -1;
+            const isOldIE = userAgent.indexOf('MSIE') !== -1;
+            const isFirefox = userAgent.indexOf('Firefox') !== -1;
+            const isChrome = userAgent.indexOf('Chrome') !== -1;
+            const isSafari = userAgent.indexOf('Safari') !== -1 && !isChrome;
+            
+            return {
+                isIE: isIE,
+                isOldIE: isOldIE,
+                isFirefox: isFirefox,
+                isChrome: isChrome,
+                isSafari: isSafari,
+                version: getBrowserVersion(userAgent)
+            };
+        }
+
+        function getBrowserVersion(userAgent) {
+            let match = userAgent.match(/(MSIE |rv:|Chrome\/|Firefox\/|Safari\/)(\d+)/);
+            return match ? parseInt(match[2]) : 0;
+        }
+
+        // Apply browser-specific fixes
+        function applyBrowserFixes() {
+            const browser = detectBrowser();
+            
+            // Add IE class to html
+            if (browser.isIE) {
+                document.documentElement.className += ' ie';
+                if (browser.isOldIE) {
+                    document.documentElement.className += ' lt-ie9';
+                }
+            }
+            
+            // Fix for old browsers that don't support flexbox
+            if (browser.version < 30 || browser.isOldIE) {
+                document.documentElement.className += ' no-flexbox';
+                console.log('Applying no-flexbox fallbacks');
+                
+                // Fallback for comment and heart buttons
+                setTimeout(() => {
+                    applyFlexboxFallbacks();
+                }, 1000);
+            }
+            
+            console.log('Browser detected:', browser);
+        }
+
+        // Apply flexbox fallbacks for old browsers
+        function applyFlexboxFallbacks() {
+            const browser = detectBrowser();
+            
+            // Fallback for comment buttons
+            document.querySelectorAll('.comment-count').forEach(btn => {
+                // Check if flexbox is not supported
+                if (!CSS.supports('display', 'flex') || browser.isOldIE || browser.version < 30) {
+                    console.log('Applying flexbox fallback to comment button');
+                    
+                    // Force inline display for old browsers
+                    btn.style.display = 'inline';
+                    btn.style.position = 'absolute';
+                    btn.style.top = '10px';
+                    btn.style.right = '10px';
+                    btn.style.background = '#000';
+                    btn.style.color = '#fff';
+                    btn.style.padding = '4px 8px';
+                    btn.style.border = '2px solid #fff';
+                    btn.style.textDecoration = 'none';
+                    btn.style.zIndex = '10';
+                    btn.style.fontSize = '12px';
+                    btn.style.fontWeight = 'bold';
+                    
+                    // Remove flexbox properties
+                    btn.style.alignItems = '';
+                    btn.style.gap = '';
+                    
+                    // Handle child elements
+                    const span = btn.querySelector('span');
+                    if (span) {
+                        span.style.display = 'inline';
+                        span.style.verticalAlign = 'middle';
+                        span.style.alignItems = '';
+                    }
+                }
+                
+                // IE8 specific fallbacks
+                if (browser.isOldIE && btn.currentStyle) {
+                    console.log('Applying IE8 specific fallbacks');
+                    btn.style.display = 'inline';
+                    btn.style.zoom = '1';
+                    btn.style.background = '#000';
+                    btn.style.border = '2px solid #fff';
+                    btn.style.color = '#fff';
+                    btn.style.padding = '2px 6px';
+                    btn.style.textDecoration = 'none';
+                    btn.style.borderRadius = '0';
+                }
+            });
+            
+            // Fallback for heart buttons
+            document.querySelectorAll('.heart-count').forEach(btn => {
+                if (!CSS.supports('display', 'flex') || browser.isOldIE || browser.version < 30) {
+                    console.log('Applying flexbox fallback to heart button');
+                    
+                    btn.style.display = 'inline';
+                    btn.style.position = 'absolute';
+                    btn.style.top = '10px';
+                    btn.style.left = '10px';
+                    btn.style.background = '#000';
+                    btn.style.color = '#fff';
+                    btn.style.padding = '4px 8px';
+                    btn.style.border = '2px solid #fff';
+                    btn.style.textDecoration = 'none';
+                    btn.style.zIndex = '10';
+                    btn.style.fontSize = '12px';
+                    btn.style.fontWeight = 'bold';
+                    
+                    // Handle child elements
+                    const span = btn.querySelector('span');
+                    if (span) {
+                        span.style.display = 'inline';
+                        span.style.verticalAlign = 'middle';
+                        span.style.alignItems = '';
+                    }
+                }
+                
+                // IE8 specific fallbacks
+                if (browser.isOldIE && btn.currentStyle) {
+                    btn.style.display = 'inline';
+                    btn.style.zoom = '1';
+                    btn.style.background = '#000';
+                    btn.style.border = '2px solid #fff';
+                    btn.style.color = '#fff';
+                    btn.style.padding = '2px 6px';
+                    btn.style.textDecoration = 'none';
+                    btn.style.borderRadius = '0';
+                }
+            });
+            
+            console.log('Flexbox fallbacks applied');
+        }
+
+        // Test comment button visibility
+        function testCommentButtonVisibility() {
+            const commentBtn = document.querySelector('.comment-count');
+            if (commentBtn) {
+                const styles = window.getComputedStyle ? window.getComputedStyle(commentBtn) : commentBtn.currentStyle;
+                const isVisible = styles.display !== 'none' && styles.visibility !== 'hidden';
+                
+                console.log('Comment button visibility test:');
+                console.log('- Display:', styles.display);
+                console.log('- Visibility:', styles.visibility);
+                console.log('- Position:', styles.position);
+                console.log('- Z-index:', styles.zIndex);
+                console.log('- Is visible:', isVisible);
+                
+                if (!isVisible) {
+                    console.warn('Comment button may not be visible in this browser');
+                    // Apply emergency fallback
+                    commentBtn.style.display = 'inline';
+                    commentBtn.style.position = 'absolute';
+                    commentBtn.style.top = '10px';
+                    commentBtn.style.right = '10px';
+                    commentBtn.style.background = '#000';
+                    commentBtn.style.color = '#fff';
+                    commentBtn.style.padding = '4px 8px';
+                    commentBtn.style.border = '2px solid #fff';
+                    commentBtn.style.zIndex = '10';
+                }
+            }
+        }
+
         // Define startApp immediately to prevent race condition
         let startAppCalled = false;
         function startApp() {
             if (startAppCalled) return;
             startAppCalled = true;
+
+            // Apply browser fixes immediately
+            applyBrowserFixes();
 
             /* ------------------------------------------------------------
                 Flicking 초기화 (Flicking 로드 이후이므로 eg 100% 존재)
@@ -251,8 +428,13 @@
                 setupExhibitionVideo();
                 setupShuffleButton();
                 setupCommentButtonListeners();
-                loadCommentCounts();
+                initializeCommentCounts();
                 setupCommentModal();
+                
+                // Test comment button visibility after rendering
+                setTimeout(() => {
+                    testCommentButtonVisibility();
+                }, 500);
             }
 
             // Shuffle function
@@ -315,9 +497,19 @@
                 modal.style.display = 'block';
                 loadComments(cardId);
                 
-                // Reset form
-                document.getElementById('comment-name').value = '';
+                // Restore saved name if exists
+                const savedName = localStorage.getItem('currentCommentName');
+                if (savedName) {
+                    document.getElementById('comment-name').value = savedName;
+                }
+                
+                // Clear text input
                 document.getElementById('comment-text').value = '';
+                
+                // Refresh display after a short delay to ensure name field is considered
+                setTimeout(() => {
+                    loadComments(cardId);
+                }, 100);
             }
 
             // Close comment modal
@@ -348,22 +540,30 @@
             // Display comments in the modal
             function displayComments(comments) {
                 const commentList = document.getElementById('comment-list');
-                const commentArray = Object.values(comments).sort((a, b) => b.timestamp - a.timestamp);
+                const commentArray = Object.entries(comments).sort((a, b) => b[1].timestamp - a[1].timestamp);
                 
                 if (commentArray.length === 0) {
                     commentList.innerHTML = '<div class="no-comments">아직 댓글이 없습니다. 따듯한 응원의 댓글을 남겨주세요!</div>';
                     return;
                 }
                 
-                commentList.innerHTML = commentArray.map(comment => `
-                    <div class="comment-item">
-                        <div class="comment-header">
-                            <span class="comment-author">${escapeHtml(comment.name)}</span>
-                            <span class="comment-time">${formatTime(comment.timestamp)}</span>
+                commentList.innerHTML = commentArray.map(([commentId, comment]) => {
+                    const isOwn = isOwnComment(comment);
+                    const deleteButton = isOwn ? `<button class="delete-comment-btn" onclick="deleteComment('${currentCommentCardId}', '${commentId}')">🗑️</button>` : '';
+                    
+                    return `
+                        <div class="comment-item ${isOwn ? 'own-comment' : ''}">
+                            <div class="comment-header">
+                                <span class="comment-author">${escapeHtml(comment.name)}</span>
+                                <div class="comment-meta">
+                                    <span class="comment-time">${formatTime(comment.timestamp)}</span>
+                                    ${deleteButton}
+                                </div>
+                            </div>
+                            <div class="comment-text">${escapeHtml(comment.text)}</div>
                         </div>
-                        <div class="comment-text">${escapeHtml(comment.text)}</div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             // Submit comment
@@ -403,7 +603,8 @@
                 const comment = {
                     name: name,
                     text: text,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    authorId: generateAuthorId(name) // Add author ID for tracking own comments
                 };
                 
                 console.log('Saving comment to Firebase:', comment);
@@ -412,6 +613,10 @@
                 commentsRef.push(comment)
                     .then((result) => {
                         console.log('Comment saved successfully:', result);
+                        
+                        // Save current name to localStorage
+                        const name = nameInput.value.trim();
+                        localStorage.setItem('currentCommentName', name);
                         
                         // Clear form
                         nameInput.value = '';
@@ -444,31 +649,161 @@
                     });
             }
 
+            // Generate author ID based on name and browser fingerprint
+            function generateAuthorId(name) {
+                const nameKey = name.toLowerCase().trim();
+                let authorId = localStorage.getItem(`authorId_${nameKey}`);
+                
+                if (!authorId) {
+                    // Create a simple fingerprint from browser info
+                    const fingerprint = navigator.userAgent + navigator.language + screen.width + screen.height;
+                    // Use proper UTF-8 encoding for btoa
+                    const data = nameKey + fingerprint;
+                    try {
+                        authorId = btoa(unescape(encodeURIComponent(data))).substring(0, 16);
+                    } catch (error) {
+                        // Fallback for very old browsers
+                        authorId = 'author_' + Math.random().toString(36).substring(2, 18);
+                    }
+                    localStorage.setItem(`authorId_${nameKey}`, authorId);
+                }
+                
+                return authorId;
+            }
+
+            // Delete comment from Firebase
+            window.deleteComment = function(cardId, commentId) {
+                if (!firebaseConnected) {
+                    alert('Firebase에 연결되지 않았습니다.');
+                    return;
+                }
+                
+                if (!confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+                    return;
+                }
+                
+                const commentRef = database.ref(`comments/${cardId}/${commentId}`);
+                commentRef.remove()
+                    .then(() => {
+                        console.log('Comment deleted successfully');
+                        // Refresh comments
+                        loadComments(cardId);
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting comment:', error);
+                        alert('댓글 삭제에 실패했습니다. 다시 시도해주세요.');
+                    });
+            }
+
+            // Check if comment is written by current user
+            function isOwnComment(comment) {
+                if (!comment.authorId) return false;
+                
+                // Try to get current author ID from localStorage for all possible names
+                const storedNames = Object.keys(localStorage).filter(key => key.startsWith('authorId_'));
+                
+                for (const storageKey of storedNames) {
+                    const storedAuthorId = localStorage.getItem(storageKey);
+                    if (storedAuthorId === comment.authorId) {
+                        return true;
+                    }
+                }
+                
+                // Also check current name field if filled
+                const name = document.getElementById('comment-name').value.trim();
+                if (name) {
+                    const authorId = generateAuthorId(name);
+                    return comment.authorId === authorId;
+                }
+                
+                return false;
+            }
+
             // Update comment count
             function updateCommentCount(cardId, count) {
+                console.log(`updateCommentCount called for ${cardId}: ${count}`);
+                
                 const commentBtn = document.querySelector(`.comment-count[data-card-id="${cardId}"]`);
                 if (commentBtn) {
                     const commentNumber = commentBtn.querySelector('.comment-number');
                     if (commentNumber) {
+                        const oldCount = commentNumber.textContent;
                         commentNumber.textContent = count;
+                        console.log(`Updated comment count for ${cardId}: ${oldCount} → ${count}`);
+                    } else {
+                        console.error(`Comment number element not found for card ${cardId}`);
                     }
+                } else {
+                    console.error(`Comment button not found for card ${cardId}`);
                 }
             }
 
             // Load all comment counts
             function loadCommentCounts() {
-                if (!firebaseConnected) return;
+                console.log('loadCommentCounts called');
+                console.log('firebaseConnected:', firebaseConnected);
+                
+                if (!firebaseConnected) {
+                    console.warn('Firebase not connected, skipping comment count loading');
+                    return;
+                }
                 
                 const commentsRef = database.ref('comments');
+                console.log('Setting up comment count listener...');
+                
                 commentsRef.on('value', (snapshot) => {
+                    console.log('Comment data received:', snapshot.val());
                     const allComments = snapshot.val() || {};
                     
                     document.querySelectorAll('.comment-count').forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
+                        console.log(`Processing card ${cardId}:`);
+                        
                         const comments = allComments[cardId] || {};
                         const count = Object.keys(comments).length;
+                        
+                        console.log(`- Card ${cardId} has ${count} comments`);
                         updateCommentCount(cardId, count);
                     });
+                }, (error) => {
+                    console.error('Error loading comment counts:', error);
+                });
+            }
+
+            // Initialize comment counts (separate function for initial load)
+            function initializeCommentCounts() {
+                console.log('initializeCommentCounts called');
+                
+                if (!firebaseConnected) {
+                    console.warn('Firebase not connected, delaying comment count initialization');
+                    setTimeout(initializeCommentCounts, 1000);
+                    return;
+                }
+                
+                // First load initial counts
+                const commentsRef = database.ref('comments');
+                commentsRef.once('value', (snapshot) => {
+                    console.log('Initial comment count load:', snapshot.val());
+                    const allComments = snapshot.val() || {};
+                    
+                    const commentButtons = document.querySelectorAll('.comment-count');
+                    console.log(`Found ${commentButtons.length} comment buttons`);
+                    
+                    commentButtons.forEach(commentBtn => {
+                        const cardId = commentBtn.dataset.cardId;
+                        console.log(`Processing card ${cardId}:`);
+                        
+                        const comments = allComments[cardId] || {};
+                        const count = Object.keys(comments).length;
+                        
+                        console.log(`Initial count for ${cardId}: ${count}`);
+                        updateCommentCount(cardId, count);
+                    });
+                    
+                    // Then set up real-time listener
+                    loadCommentCounts();
+                }).catch((error) => {
+                    console.error('Error loading initial comment counts:', error);
                 });
             }
 
@@ -499,6 +834,17 @@
                 
                 // Submit button
                 document.getElementById('comment-submit').addEventListener('click', submitComment);
+                
+                // Name field change detection
+                document.getElementById('comment-name').addEventListener('input', function() {
+                    const name = this.value.trim();
+                    localStorage.setItem('currentCommentName', name);
+                    
+                    // Refresh comments to show/hide delete buttons
+                    if (currentCommentCardId) {
+                        loadComments(currentCommentCardId);
+                    }
+                });
                 
                 // Enter key submission in text area
                 document.getElementById('comment-text').addEventListener('keydown', function(e) {
@@ -626,6 +972,44 @@
                         });
                 } else {
                     console.error('Firebase not properly initialized');
+                }
+            };
+
+            // Debug function for comment counts
+            window.testCommentCounts = function() {
+                console.log('=== Comment Count Debug ===');
+                
+                // Check comment buttons
+                const commentButtons = document.querySelectorAll('.comment-count');
+                console.log(`Found ${commentButtons.length} comment buttons`);
+                
+                commentButtons.forEach((btn, index) => {
+                    const cardId = btn.dataset.cardId;
+                    const commentNumber = btn.querySelector('.comment-number');
+                    const currentCount = commentNumber ? commentNumber.textContent : 'N/A';
+                    
+                    console.log(`Button ${index + 1}:`);
+                    console.log(`- Card ID: ${cardId}`);
+                    console.log(`- Current count: ${currentCount}`);
+                    console.log(`- Element exists: ${!!commentNumber}`);
+                });
+                
+                // Check Firebase data
+                if (firebaseConnected && database) {
+                    database.ref('comments').once('value')
+                        .then((snapshot) => {
+                            const allComments = snapshot.val() || {};
+                            console.log('Firebase comment data:', allComments);
+                            
+                            Object.keys(allComments).forEach(cardId => {
+                                const comments = allComments[cardId];
+                                const count = Object.keys(comments).length;
+                                console.log(`Card ${cardId}: ${count} comments`);
+                            });
+                        })
+                        .catch((error) => {
+                            console.error('Failed to read Firebase comments:', error);
+                        });
                 }
             };
 

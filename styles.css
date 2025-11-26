@@ -120,28 +120,70 @@ body::-webkit-scrollbar {
     position: absolute;
     top: 10px;
     right: 10px;
+    background: #000000;
     background: rgba(0, 0, 0, 0.5);
     color: white;
     padding: 4px 8px;
     border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
     font-size: 0.8rem;
     font-weight: bold;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
     display: flex;
+    -webkit-align-items: center;
+    -moz-align-items: center;
+    -ms-align-items: center;
     align-items: center;
     gap: 4px;
     z-index: 10;
     cursor: pointer;
     transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
 }
 
 .comment-count:hover {
     background: rgba(90, 79, 207, 0.7);
     transform: scale(1.05);
+    -webkit-transform: scale(1.05);
+    -moz-transform: scale(1.05);
+    -o-transform: scale(1.05);
+    -ms-transform: scale(1.05);
 }
 
 .comment-count span {
-    display: flex;
+    display: -webkit-inline-box;
+    display: -moz-inline-box;
+    display: -ms-inline-flexbox;
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    -webkit-align-items: center;
+    -moz-align-items: center;
+    -ms-align-items: center;
     align-items: center;
+}
+
+/* Fallback for IE8 and below */
+.lt-ie9 .comment-count {
+    background: #000;
+    border: 2px solid #fff;
+    padding: 2px 6px;
+    font-size: 12px;
+    color: #fff;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    text-decoration: none;
+}
+
+.lt-ie9 .comment-count:hover {
+    background: #5a4fcf;
+    text-decoration: underline;
 }
 
 /* --- Heart Clicked State --- */
@@ -412,6 +454,40 @@ body::-webkit-scrollbar {
     color: rgba(255, 255, 255, 0.9);
     line-height: 1.4;
     font-size: 0.9rem;
+}
+
+/* --- Own Comments and Delete Button --- */
+.own-comment {
+    background: rgba(255, 77, 0, 0.1);
+    border: 1px solid rgba(255, 77, 0, 0.3);
+}
+
+.comment-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.delete-comment-btn {
+    background: rgba(255, 77, 0, 0.2);
+    border: 1px solid rgba(255, 77, 0, 0.4);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.delete-comment-btn:hover {
+    background: rgba(255, 77, 0, 0.4);
+    border-color: rgba(255, 77, 0, 0.6);
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.delete-comment-btn:active {
+    transform: scale(0.95);
 }
 
 /* 댓글 입력창 (1/3) */
