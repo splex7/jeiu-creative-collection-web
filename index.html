@@ -373,42 +373,15 @@
                     return;
                 }
                 
-                // 기기별 중복 클릭 방지 확인
-                const storageKey = `heart_clicked_${cardId}`;
-                const isAlreadyClicked = localStorage.getItem(storageKey);
-                
                 try {
                     const heartRef = database.ref(`hearts/${cardId}`);
                     
                     const snapshot = await heartRef.once('value');
                     const currentCount = snapshot.val() || 0;
                     
-                    if (isAlreadyClicked) {
-                        // 이미 클릭한 경우 - 하트 취소
-                        if (currentCount > 0) {
-                            await heartRef.set(currentCount - 1);
-                        }
-                        localStorage.removeItem(storageKey);
-                        
-                        // 하트 버튼 활성화 시각적 표시
-                        const cardImage = document.querySelector(`[data-card-id="${cardId}"]`);
-                        if (cardImage) {
-                            cardImage.classList.remove('heart-clicked');
-                        }
-                    } else {
-                        // 처음 클릭한 경우 - 하트 추가
-                        const newCount = currentCount + 1;
-                        await heartRef.set(newCount);
-                        
-                        // 클릭 기록 저장 (영구 저장)
-                        localStorage.setItem(storageKey, 'true');
-                        
-                        // 하트 버튼 비활성화 시각적 표시
-                        const cardImage = document.querySelector(`[data-card-id="${cardId}"]`);
-                        if (cardImage) {
-                            cardImage.classList.add('heart-clicked');
-                        }
-                    }
+                    // 하트 추가 (무제한)
+                    const newCount = currentCount + 1;
+                    await heartRef.set(newCount);
                     
                 } catch (error) {
                     console.error('하트 카운트 변경 실패:', error);
@@ -426,14 +399,6 @@
                             const heartNumber = cardImage.querySelector('.heart-number');
                             if (heartNumber) {
                                 heartNumber.textContent = heartsData[cardId] || 0;
-                            }
-                            
-                            // 기기별 클릭 상태 확인 및 시각적 표시
-                            const storageKey = `heart_clicked_${cardId}`;
-                            if (localStorage.getItem(storageKey)) {
-                                cardImage.classList.add('heart-clicked');
-                            } else {
-                                cardImage.classList.remove('heart-clicked');
                             }
                         });
                     });
@@ -717,6 +682,15 @@
 
 <body>
 
+    <!-- QR Code (Desktop Only) -->
+    <div class="qr-code-container">
+        <img src="img/qrcodes.png" alt="QR Codes" class="qr-code-image">
+        <div class="qr-code-text">
+            <div class="qr-code-url">JEIU.CC</div>
+            <div class="qr-code-instruction">모바일로 접속해주세요</div>
+        </div>
+    </div>
+
     <!-- WebGL Canvas Background -->
     <div id="canvas-container">
         <canvas id="glCanvas"></canvas>
@@ -752,6 +726,8 @@
                     학생들의 열정과 기술이 담긴 프로젝트들을 영구히 기록합니다.
                 </p>
                 
+                <marquee class="heart-instruction">마음에 드는 프로젝트에 하트를 눌러주세요!</marquee>
+
                 <!-- 최종발표현장하이라이트 버튼 -->
                 <button id="exhibition-video-btn" class="exhibition-video-btn">
                     🎬 최종발표현장하이라이트

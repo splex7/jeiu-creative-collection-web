@@ -1137,3 +1137,82 @@ footer {
         font-size: 0.85rem;
     }
 }
+
+/* --- QR Code Container (Desktop Only) --- */
+.qr-code-container {
+    position: fixed;
+    top: 80px;
+    right: 80px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.qr-code-container:hover {
+    transform: scale(1.05);
+}
+
+.qr-code-image {
+    width: 120px;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+.qr-code-text {
+    text-align: center;
+    margin-top: 8px;
+}
+
+.qr-code-url {
+    font-weight: 700;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.2;
+}
+
+.qr-code-instruction {
+    font-weight: 700;
+    font-size: 22px;
+    color: #555;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+
+/* --- Heart Instruction Marquee --- */
+.heart-instruction {
+    font-weight: 700;
+    font-size: 18px;
+    color: #ff4d00;
+    margin: 15px 0;
+    padding: 8px 0;
+    text-shadow: 0 0 10px rgba(255, 77, 0, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+    white-space: nowrap;
+}
+
+@keyframes pulse {
+    0% { 
+        color: #ff4d00;
+        transform: scale(1);
+    }
+    50% { 
+        color: #ff8c00;
+        transform: scale(1.02);
+    }
+    100% { 
+        color: #ff4d00;
+        transform: scale(1);
+    }
+}
+
+/* Hide QR code on mobile and tablet */
+@media (max-width: 1024px) {
+    .qr-code-container {
+        display: none;
+    }
+}
