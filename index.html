@@ -1118,6 +1118,8 @@
             function setupStudentSpeechBubbles() {
                 let currentBubble = null;
                 let hideTimeout = null;
+                let isCreatingBubble = false; // Prevent multiple bubble creation
+                let lastRequestedBubble = null; // Track last requested bubble
 
                 // 전역 함수로 hideSpeechBubble 노출
                 window.hideSpeechBubble = hideSpeechBubble;
@@ -1155,12 +1157,24 @@
                 }, 500); // Flicking 초기화 대기
 
                 function showSpeechBubble(element, studentName) {
-                    // 기존 말풍선 제거
+                    // Prevent multiple bubble creation
+                    if (isCreatingBubble) {
+                        lastRequestedBubble = { element, studentName };
+                        return;
+                    }
+                    
+                    isCreatingBubble = true;
+                    
+                    // 기존 말풍선 즉시 제거
                     if (currentBubble) {
-                        currentBubble.remove();
+                        if (currentBubble.parentNode) {
+                            currentBubble.parentNode.removeChild(currentBubble);
+                        }
+                        currentBubble = null;
                     }
                     if (hideTimeout) {
                         clearTimeout(hideTimeout);
+                        hideTimeout = null;
                     }
 
                     // 학생 데이터 로드
@@ -1213,6 +1227,17 @@
                         });
                         
                         currentBubble = bubble;
+                        isCreatingBubble = false;
+                        
+                        // Check if there's a pending request
+                        if (lastRequestedBubble) {
+                            const pending = lastRequestedBubble;
+                            lastRequestedBubble = null;
+                            // Only show new bubble if it's different
+                            if (pending.element !== element || pending.studentName !== studentName) {
+                                setTimeout(() => showSpeechBubble(pending.element, pending.studentName), 100);
+                            }
+                        }
                         
                         // 3초 후 자동 숨김
                         hideTimeout = setTimeout(() => {
