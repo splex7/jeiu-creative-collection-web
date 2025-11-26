@@ -1349,11 +1349,17 @@ footer {
 
     .exhibition-video-btn,
     .shuffle-cards-btn {
-        display: block;
-        width: 100%;
-        margin: 5px 0;
-        margin-left: 0;
-       
+        display: inline-block; /* Changed from block to inline-block */
+        width: auto; /* Changed from 100% to auto */
+        margin: 5px 10px; /* Adjust margin for side-by-side layout */
+        flex: 1; /* Allow buttons to share space equally */
+        min-width: 140px; /* Minimum width for readability */
+    }
+    
+    /* Also ensure button container maintains flex layout */
+    .button-container {
+        flex-wrap: nowrap; /* Prevent wrapping to new line */
+        gap: 10px;
     }
 }
 
