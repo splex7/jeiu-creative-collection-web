@@ -158,7 +158,10 @@
                 }
             }
 
-            /* ----------------------------- 팀 카드 생성 ----------------------------- */
+        // Global variable to store current projects
+        let currentProjects = [];
+
+        /* ----------------------------- 팀 카드 생성 ----------------------------- */
             async function generateTeamCards(year) {
 
                 const grid = document.getElementById("project-grid");
@@ -166,6 +169,17 @@
 
                 const students = await loadStudentData();
                 const projects = await loadProjectData(students, year);
+                
+                // Store projects globally for shuffling
+                currentProjects = projects;
+
+                renderProjects(projects);
+            }
+
+            // Function to render projects
+            function renderProjects(projects) {
+                const grid = document.getElementById("project-grid");
+                grid.innerHTML = "";
 
                 projects.forEach(p => {
                     const card = document.createElement("div");
@@ -228,6 +242,46 @@
                 loadHeartCounts();
                 setupStudentSpeechBubbles();
                 setupExhibitionVideo();
+                setupShuffleButton();
+            }
+
+            // Shuffle function
+            function shuffleProjects() {
+                if (currentProjects.length === 0) return;
+                
+                const grid = document.getElementById("project-grid");
+                
+                // Fade out animation
+                grid.classList.add('shuffle-fade-out');
+                
+                setTimeout(() => {
+                    // Shuffle the projects array
+                    const shuffled = [...currentProjects];
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+                    
+                    // Update global variable and re-render
+                    currentProjects = shuffled;
+                    renderProjects(currentProjects);
+                    
+                    // Fade in animation
+                    grid.classList.remove('shuffle-fade-out');
+                    grid.classList.add('shuffle-fade-in');
+                    
+                    setTimeout(() => {
+                        grid.classList.remove('shuffle-fade-in');
+                    }, 500);
+                }, 300);
+            }
+
+            // Setup shuffle button
+            function setupShuffleButton() {
+                const shuffleBtn = document.getElementById('shuffle-cards-btn');
+                if (shuffleBtn) {
+                    shuffleBtn.addEventListener('click', shuffleProjects);
+                }
             }
 
 
@@ -744,10 +798,18 @@
                 
                 <marquee class="heart-instruction">마음에 드는 프로젝트에 하트를 눌러주세요!</marquee>
 
-                <!-- 최종발표현장하이라이트 버튼 -->
-                <button id="exhibition-video-btn" class="exhibition-video-btn">
-                    🎬 최종발표현장하이라이트
-                </button>
+                <!-- 버튼 컨테이너 -->
+                <div class="button-container">
+                    <!-- 최종발표현장하이라이트 버튼 -->
+                    <button id="exhibition-video-btn" class="exhibition-video-btn">
+                        🎬 최종발표현장하이라이트
+                    </button>
+                    
+                    <!-- 셔플 카드 버튼 -->
+                    <button id="shuffle-cards-btn" class="shuffle-cards-btn">
+                        🔀 카드 셔플
+                    </button>
+                </div>
             </div>
         </header>
 
