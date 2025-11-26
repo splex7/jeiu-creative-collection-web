@@ -189,8 +189,15 @@
                         <div class="card-image" data-card-id="${p.id}">
                             <img src="img/${p.id}.png" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
                             <img src="img/${p.id}r.jpg" onerror="this.style.display='none';" class="kenburns-image">
+                            
+                            <!-- 좌측 하트 버튼 -->
                             <div class="heart-count">
                                 <span>❤️ <span class="heart-number">0</span></span>
+                            </div>
+                            
+                            <!-- 우측 댓글 버튼 -->
+                            <div class="comment-count" data-card-id="${p.id}">
+                                <span>💬 <span class="comment-number">0</span></span>
                             </div>
                         </div>
 
@@ -243,6 +250,9 @@
                 setupStudentSpeechBubbles();
                 setupExhibitionVideo();
                 setupShuffleButton();
+                setupCommentButtonListeners();
+                loadCommentCounts();
+                setupCommentModal();
             }
 
             // Shuffle function
@@ -283,6 +293,341 @@
                     shuffleBtn.addEventListener('click', shuffleProjects);
                 }
             }
+
+            // Comment system variables
+            let currentCommentCardId = null;
+
+            // Setup comment button listeners
+            function setupCommentButtonListeners() {
+                document.querySelectorAll('.comment-count').forEach(commentBtn => {
+                    commentBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const cardId = this.dataset.cardId;
+                        openCommentModal(cardId);
+                    });
+                });
+            }
+
+            // Open comment modal
+            function openCommentModal(cardId) {
+                currentCommentCardId = cardId;
+                const modal = document.getElementById('comment-modal');
+                modal.style.display = 'block';
+                loadComments(cardId);
+                
+                // Reset form
+                document.getElementById('comment-name').value = '';
+                document.getElementById('comment-text').value = '';
+            }
+
+            // Close comment modal
+            function closeCommentModal() {
+                const modal = document.getElementById('comment-modal');
+                modal.style.display = 'none';
+                currentCommentCardId = null;
+            }
+
+            // Load comments from Firebase
+            function loadComments(cardId) {
+                if (!firebaseConnected) return;
+                
+                const commentsRef = database.ref(`comments/${cardId}`);
+                commentsRef.once('value', (snapshot) => {
+                    const comments = snapshot.val() || {};
+                    displayComments(comments);
+                });
+                
+                // Real-time listener
+                commentsRef.on('value', (snapshot) => {
+                    const comments = snapshot.val() || {};
+                    displayComments(comments);
+                    updateCommentCount(cardId, Object.keys(comments).length);
+                });
+            }
+
+            // Display comments in the modal
+            function displayComments(comments) {
+                const commentList = document.getElementById('comment-list');
+                const commentArray = Object.values(comments).sort((a, b) => b.timestamp - a.timestamp);
+                
+                if (commentArray.length === 0) {
+                    commentList.innerHTML = '<div class="no-comments">아직 댓글이 없습니다. 따듯한 응원의 댓글을 남겨주세요!</div>';
+                    return;
+                }
+                
+                commentList.innerHTML = commentArray.map(comment => `
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">${escapeHtml(comment.name)}</span>
+                            <span class="comment-time">${formatTime(comment.timestamp)}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(comment.text)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Submit comment
+            function submitComment() {
+                console.log('submitComment called');
+                console.log('firebaseConnected:', firebaseConnected);
+                console.log('currentCommentCardId:', currentCommentCardId);
+                
+                if (!firebaseConnected) {
+                    alert('Firebase에 연결되지 않았습니다. 잠시 후 다시 시도해주세요.');
+                    return;
+                }
+                
+                if (!currentCommentCardId) {
+                    alert('카드가 선택되지 않았습니다. 다시 시도해주세요.');
+                    return;
+                }
+                
+                const nameInput = document.getElementById('comment-name');
+                const textInput = document.getElementById('comment-text');
+                const submitBtn = document.getElementById('comment-submit');
+                
+                const name = nameInput.value.trim();
+                const text = textInput.value.trim();
+                
+                console.log('Comment data:', { name, text, cardId: currentCommentCardId });
+                
+                if (!name || !text) {
+                    alert('이름과 댓글을 모두 입력해주세요.');
+                    return;
+                }
+                
+                // Disable button during submission
+                submitBtn.disabled = true;
+                submitBtn.textContent = '전송 중...';
+                
+                const comment = {
+                    name: name,
+                    text: text,
+                    timestamp: Date.now()
+                };
+                
+                console.log('Saving comment to Firebase:', comment);
+                
+                const commentsRef = database.ref(`comments/${currentCommentCardId}`);
+                commentsRef.push(comment)
+                    .then((result) => {
+                        console.log('Comment saved successfully:', result);
+                        
+                        // Clear form
+                        nameInput.value = '';
+                        textInput.value = '';
+                        
+                        // Re-enable button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '보내기';
+                        
+                        // Focus back to name input
+                        nameInput.focus();
+                    })
+                    .catch((error) => {
+                        console.error('댓글 전송 실패:', error);
+                        console.error('Error details:', error.code, error.message);
+                        
+                        let errorMessage = '댓글 전송에 실패했습니다. 다시 시도해주세요.';
+                        
+                        if (error.code === 'PERMISSION_DENIED') {
+                            errorMessage = '댓글 작성 권한이 없습니다. 관리자에게 문의해주세요.';
+                        } else if (error.code === 'NETWORK_ERROR') {
+                            errorMessage = '네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인해주세요.';
+                        }
+                        
+                        alert(errorMessage);
+                        
+                        // Re-enable button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '보내기';
+                    });
+            }
+
+            // Update comment count
+            function updateCommentCount(cardId, count) {
+                const commentBtn = document.querySelector(`.comment-count[data-card-id="${cardId}"]`);
+                if (commentBtn) {
+                    const commentNumber = commentBtn.querySelector('.comment-number');
+                    if (commentNumber) {
+                        commentNumber.textContent = count;
+                    }
+                }
+            }
+
+            // Load all comment counts
+            function loadCommentCounts() {
+                if (!firebaseConnected) return;
+                
+                const commentsRef = database.ref('comments');
+                commentsRef.on('value', (snapshot) => {
+                    const allComments = snapshot.val() || {};
+                    
+                    document.querySelectorAll('.comment-count').forEach(commentBtn => {
+                        const cardId = commentBtn.dataset.cardId;
+                        const comments = allComments[cardId] || {};
+                        const count = Object.keys(comments).length;
+                        updateCommentCount(cardId, count);
+                    });
+                });
+            }
+
+            // Utility functions
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function formatTime(timestamp) {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 60000) return '방금';
+                if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
+                if (diff < 604800000) return `${Math.floor(diff / 86400000)}일 전`;
+                
+                return date.toLocaleDateString('ko-KR');
+            }
+
+            // Setup comment modal event listeners
+            function setupCommentModal() {
+                // Close button
+                document.getElementById('close-comment-modal').addEventListener('click', closeCommentModal);
+                
+                // Submit button
+                document.getElementById('comment-submit').addEventListener('click', submitComment);
+                
+                // Enter key submission in text area
+                document.getElementById('comment-text').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submitComment();
+                    }
+                });
+                
+                // Emoji button clicks
+                document.querySelectorAll('.emoji-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const emoji = this.dataset.emoji;
+                        const textArea = document.getElementById('comment-text');
+                        
+                        // Insert emoji at cursor position
+                        const start = textArea.selectionStart;
+                        const end = textArea.selectionEnd;
+                        const text = textArea.value;
+                        
+                        const newText = text.substring(0, start) + emoji + text.substring(end);
+                        textArea.value = newText;
+                        
+                        // Set cursor position after emoji
+                        const newCursorPos = start + emoji.length;
+                        textArea.setSelectionRange(newCursorPos, newCursorPos);
+                        textArea.focus();
+                        
+                        // Add visual feedback
+                        this.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 100);
+                    });
+                });
+                
+                // Close modal when clicking outside
+                document.getElementById('comment-modal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeCommentModal();
+                    }
+                });
+                
+                // Test Firebase permissions
+                testFirebasePermissions();
+            }
+
+            // Test Firebase permissions for comments
+            function testFirebasePermissions() {
+                if (!firebaseConnected) {
+                    console.log('Firebase not connected, skipping permission test');
+                    return;
+                }
+                
+                console.log('Testing Firebase permissions...');
+                
+                // Test reading comments
+                database.ref('comments').once('value')
+                    .then(() => {
+                        console.log('✓ Comments read permission: OK');
+                    })
+                    .catch((error) => {
+                        console.error('✗ Comments read permission:', error.code, error.message);
+                    });
+                
+                // Test writing comments (with a test path)
+                const testPath = `comments/_test/${Date.now()}`;
+                database.ref(testPath).set({
+                    name: 'test',
+                    text: 'test',
+                    timestamp: Date.now()
+                })
+                    .then(() => {
+                        console.log('✓ Comments write permission: OK');
+                        // Clean up test data
+                        database.ref(testPath).remove();
+                    })
+                    .catch((error) => {
+                        console.error('✗ Comments write permission:', error.code, error.message);
+                        
+                        if (error.code === 'PERMISSION_DENIED') {
+                            alert('Firebase 댓글 쓰기 권한이 없습니다. Firebase 규칙을 확인해주세요.\nFirebase Console → Realtime Database → Rules에서 comments 경로의 쓰기 권한을 확인하세요.');
+                        }
+                    });
+            }
+
+            // Debug function for manual testing
+            window.testComment = function() {
+                console.log('=== Comment System Debug ===');
+                console.log('Firebase Connected:', firebaseConnected);
+                console.log('Database:', database);
+                
+                if (firebaseConnected && database) {
+                    // Try to write a test comment
+                    const testComment = {
+                        name: 'Debug User',
+                        text: 'This is a test comment',
+                        timestamp: Date.now()
+                    };
+                    
+                    database.ref('comments/_debug/test').set(testComment)
+                        .then(() => {
+                            console.log('✓ Test comment written successfully');
+                            
+                            // Try to read it back
+                            database.ref('comments/_debug/test').once('value')
+                                .then((snapshot) => {
+                                    console.log('✓ Test comment read successfully:', snapshot.val());
+                                    
+                                    // Clean up
+                                    database.ref('comments/_debug').remove()
+                                        .then(() => {
+                                            console.log('✓ Test data cleaned up');
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.error('✗ Failed to read test comment:', error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('✗ Failed to write test comment:', error);
+                            console.error('Error code:', error.code);
+                            console.error('Error message:', error.message);
+                        });
+                } else {
+                    console.error('Firebase not properly initialized');
+                }
+            };
 
 
             /* ------------------------- 유튜브 모달 ------------------------- */
@@ -847,6 +1192,45 @@
                 <div class="video-tabs" id="video-tabs">
                     <button class="tab-button active" data-video-type="interim">중간발표</button>
                     <button class="tab-button" data-video-type="final">최종발표</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comment Lightbox Modal -->
+        <div id="comment-modal" class="comment-modal">
+            <div class="comment-modal-content">
+                <div class="comment-modal-header">
+                    <h3>💬 댓글</h3>
+                    <span class="comment-close" id="close-comment-modal">&times;</span>
+                </div>
+                
+                <!-- 댓글 리스트 (2/3) -->
+                <div class="comment-list-container">
+                    <div class="comment-list" id="comment-list">
+                        <!-- 댓글들이 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+                
+                <!-- 댓글 입력창 (1/3) -->
+                <div class="comment-input-container">
+                    <div class="comment-input-form">
+                        <input type="text" id="comment-name" placeholder="이름" maxlength="20" class="comment-name-input">
+                        <textarea id="comment-text" placeholder="댓글을 남겨주세요..." maxlength="200" class="comment-text-input"></textarea>
+                        
+                        <!-- 감정 이모지 선택기 -->
+                        <div class="emoji-picker">
+                            <span class="emoji-label">감정 표현:</span>
+                            <div class="emoji-list">
+                                <button class="emoji-btn" data-emoji="❤️">❤️</button>
+                                <button class="emoji-btn" data-emoji="👍">👍</button>
+                                <button class="emoji-btn" data-emoji="😊">😊</button>
+                                <button class="emoji-btn" data-emoji="🎉">🎉</button>
+                                <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                            </div>
+                        </div>
+                        
+                        <button id="comment-submit" class="comment-submit-btn">보내기</button>
+                    </div>
                 </div>
             </div>
         </div>
