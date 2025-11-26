@@ -638,14 +638,27 @@ body::-webkit-scrollbar {
     pointer-events: none;
     opacity: 0;
     transform: translateY(10px);
-    transition: all 0.3s ease;
+    /* Safari-compatible transitions */
+    -webkit-transition: opacity 0.3s ease, transform 0.3s ease;
+    -moz-transition: opacity 0.3s ease, transform 0.3s ease;
+    -o-transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     max-width: 200px;
     word-wrap: break-word;
+    /* Safari specific fixes */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .speech-bubble.show {
     opacity: 1;
     transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -o-transform: translateY(0);
+    -ms-transform: translateY(0);
 }
 
 .speech-bubble::before {

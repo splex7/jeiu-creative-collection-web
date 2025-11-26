@@ -111,7 +111,7 @@
             // Fix for old browsers that don't support flexbox
             if (browser.version < 30 || browser.isOldIE) {
                 document.documentElement.className += ' no-flexbox';
-                console.log('Applying no-flexbox fallbacks');
+                // Apply no-flexbox fallbacks
                 
                 // Fallback for comment and heart buttons
                 setTimeout(() => {
@@ -119,7 +119,7 @@
                 }, 1000);
             }
             
-            console.log('Browser detected:', browser);
+            // Browser detection complete
         }
 
         // Apply flexbox fallbacks for old browsers
@@ -130,7 +130,7 @@
             document.querySelectorAll('.comment-count').forEach(btn => {
                 // Check if flexbox is not supported
                 if (!CSS.supports('display', 'flex') || browser.isOldIE || browser.version < 30) {
-                    console.log('Applying flexbox fallback to comment button');
+                    // Apply flexbox fallback to comment button
                     
                     // Force inline display for old browsers
                     btn.style.display = 'inline';
@@ -161,7 +161,7 @@
                 
                 // IE8 specific fallbacks
                 if (browser.isOldIE && btn.currentStyle) {
-                    console.log('Applying IE8 specific fallbacks');
+                    // Apply IE8 specific fallbacks
                     btn.style.display = 'inline';
                     btn.style.zoom = '1';
                     btn.style.background = '#000';
@@ -176,7 +176,7 @@
             // Fallback for heart buttons
             document.querySelectorAll('.heart-count').forEach(btn => {
                 if (!CSS.supports('display', 'flex') || browser.isOldIE || browser.version < 30) {
-                    console.log('Applying flexbox fallback to heart button');
+                    // Apply flexbox fallback to heart button
                     
                     btn.style.display = 'inline';
                     btn.style.position = 'absolute';
@@ -213,7 +213,7 @@
                 }
             });
             
-            console.log('Flexbox fallbacks applied');
+            // Flexbox fallbacks applied
         }
 
         // Test comment button visibility
@@ -222,13 +222,6 @@
             if (commentBtn) {
                 const styles = window.getComputedStyle ? window.getComputedStyle(commentBtn) : commentBtn.currentStyle;
                 const isVisible = styles.display !== 'none' && styles.visibility !== 'hidden';
-                
-                console.log('Comment button visibility test:');
-                console.log('- Display:', styles.display);
-                console.log('- Visibility:', styles.visibility);
-                console.log('- Position:', styles.position);
-                console.log('- Z-index:', styles.zIndex);
-                console.log('- Is visible:', isVisible);
                 
                 if (!isVisible) {
                     console.warn('Comment button may not be visible in this browser');
@@ -568,9 +561,6 @@
 
             // Submit comment
             function submitComment() {
-                console.log('submitComment called');
-                console.log('firebaseConnected:', firebaseConnected);
-                console.log('currentCommentCardId:', currentCommentCardId);
                 
                 if (!firebaseConnected) {
                     alert('Firebase에 연결되지 않았습니다. 잠시 후 다시 시도해주세요.');
@@ -589,17 +579,6 @@
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
                 
-                console.log('Comment data:', { name, text, cardId: currentCommentCardId });
-                
-                if (!name || !text) {
-                    alert('이름과 댓글을 모두 입력해주세요.');
-                    return;
-                }
-                
-                // Disable button during submission
-                submitBtn.disabled = true;
-                submitBtn.textContent = '전송 중...';
-                
                 const comment = {
                     name: name,
                     text: text,
@@ -607,12 +586,9 @@
                     authorId: generateAuthorId(name) // Add author ID for tracking own comments
                 };
                 
-                console.log('Saving comment to Firebase:', comment);
-                
                 const commentsRef = database.ref(`comments/${currentCommentCardId}`);
                 commentsRef.push(comment)
                     .then((result) => {
-                        console.log('Comment saved successfully:', result);
                         
                         // Save current name to localStorage
                         const name = nameInput.value.trim();
@@ -685,7 +661,7 @@
                 const commentRef = database.ref(`comments/${cardId}/${commentId}`);
                 commentRef.remove()
                     .then(() => {
-                        console.log('Comment deleted successfully');
+                        // Comment deleted successfully
                         // Refresh comments
                         loadComments(cardId);
                     })
@@ -721,7 +697,6 @@
 
             // Update comment count
             function updateCommentCount(cardId, count) {
-                console.log(`updateCommentCount called for ${cardId}: ${count}`);
                 
                 const commentBtn = document.querySelector(`.comment-count[data-card-id="${cardId}"]`);
                 if (commentBtn) {
@@ -729,7 +704,6 @@
                     if (commentNumber) {
                         const oldCount = commentNumber.textContent;
                         commentNumber.textContent = count;
-                        console.log(`Updated comment count for ${cardId}: ${oldCount} → ${count}`);
                     } else {
                         console.error(`Comment number element not found for card ${cardId}`);
                     }
@@ -740,29 +714,18 @@
 
             // Load all comment counts
             function loadCommentCounts() {
-                console.log('loadCommentCounts called');
-                console.log('firebaseConnected:', firebaseConnected);
-                
-                if (!firebaseConnected) {
-                    console.warn('Firebase not connected, skipping comment count loading');
-                    return;
-                }
+                if (!firebaseConnected) return;
                 
                 const commentsRef = database.ref('comments');
-                console.log('Setting up comment count listener...');
-                
                 commentsRef.on('value', (snapshot) => {
-                    console.log('Comment data received:', snapshot.val());
                     const allComments = snapshot.val() || {};
                     
                     document.querySelectorAll('.comment-count').forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
-                        console.log(`Processing card ${cardId}:`);
                         
                         const comments = allComments[cardId] || {};
                         const count = Object.keys(comments).length;
                         
-                        console.log(`- Card ${cardId} has ${count} comments`);
                         updateCommentCount(cardId, count);
                     });
                 }, (error) => {
@@ -772,10 +735,7 @@
 
             // Initialize comment counts (separate function for initial load)
             function initializeCommentCounts() {
-                console.log('initializeCommentCounts called');
-                
                 if (!firebaseConnected) {
-                    console.warn('Firebase not connected, delaying comment count initialization');
                     setTimeout(initializeCommentCounts, 1000);
                     return;
                 }
@@ -783,20 +743,16 @@
                 // First load initial counts
                 const commentsRef = database.ref('comments');
                 commentsRef.once('value', (snapshot) => {
-                    console.log('Initial comment count load:', snapshot.val());
                     const allComments = snapshot.val() || {};
                     
                     const commentButtons = document.querySelectorAll('.comment-count');
-                    console.log(`Found ${commentButtons.length} comment buttons`);
                     
                     commentButtons.forEach(commentBtn => {
                         const cardId = commentBtn.dataset.cardId;
-                        console.log(`Processing card ${cardId}:`);
                         
                         const comments = allComments[cardId] || {};
                         const count = Object.keys(comments).length;
                         
-                        console.log(`Initial count for ${cardId}: ${count}`);
                         updateCommentCount(cardId, count);
                     });
                     
@@ -895,17 +851,12 @@
 
             // Test Firebase permissions for comments
             function testFirebasePermissions() {
-                if (!firebaseConnected) {
-                    console.log('Firebase not connected, skipping permission test');
-                    return;
-                }
+                if (!firebaseConnected || !database) return;
                 
-                console.log('Testing Firebase permissions...');
-                
-                // Test reading comments
+                // Test read permission
                 database.ref('comments').once('value')
                     .then(() => {
-                        console.log('✓ Comments read permission: OK');
+                        // Comments read permission: OK
                     })
                     .catch((error) => {
                         console.error('✗ Comments read permission:', error.code, error.message);
@@ -919,7 +870,7 @@
                     timestamp: Date.now()
                 })
                     .then(() => {
-                        console.log('✓ Comments write permission: OK');
+                        // Comments write permission: OK
                         // Clean up test data
                         database.ref(testPath).remove();
                     })
@@ -932,87 +883,7 @@
                     });
             }
 
-            // Debug function for manual testing
-            window.testComment = function() {
-                console.log('=== Comment System Debug ===');
-                console.log('Firebase Connected:', firebaseConnected);
-                console.log('Database:', database);
-                
-                if (firebaseConnected && database) {
-                    // Try to write a test comment
-                    const testComment = {
-                        name: 'Debug User',
-                        text: 'This is a test comment',
-                        timestamp: Date.now()
-                    };
-                    
-                    database.ref('comments/_debug/test').set(testComment)
-                        .then(() => {
-                            console.log('✓ Test comment written successfully');
-                            
-                            // Try to read it back
-                            database.ref('comments/_debug/test').once('value')
-                                .then((snapshot) => {
-                                    console.log('✓ Test comment read successfully:', snapshot.val());
-                                    
-                                    // Clean up
-                                    database.ref('comments/_debug').remove()
-                                        .then(() => {
-                                            console.log('✓ Test data cleaned up');
-                                        });
-                                })
-                                .catch((error) => {
-                                    console.error('✗ Failed to read test comment:', error);
-                                });
-                        })
-                        .catch((error) => {
-                            console.error('✗ Failed to write test comment:', error);
-                            console.error('Error code:', error.code);
-                            console.error('Error message:', error.message);
-                        });
-                } else {
-                    console.error('Firebase not properly initialized');
-                }
-            };
-
-            // Debug function for comment counts
-            window.testCommentCounts = function() {
-                console.log('=== Comment Count Debug ===');
-                
-                // Check comment buttons
-                const commentButtons = document.querySelectorAll('.comment-count');
-                console.log(`Found ${commentButtons.length} comment buttons`);
-                
-                commentButtons.forEach((btn, index) => {
-                    const cardId = btn.dataset.cardId;
-                    const commentNumber = btn.querySelector('.comment-number');
-                    const currentCount = commentNumber ? commentNumber.textContent : 'N/A';
-                    
-                    console.log(`Button ${index + 1}:`);
-                    console.log(`- Card ID: ${cardId}`);
-                    console.log(`- Current count: ${currentCount}`);
-                    console.log(`- Element exists: ${!!commentNumber}`);
-                });
-                
-                // Check Firebase data
-                if (firebaseConnected && database) {
-                    database.ref('comments').once('value')
-                        .then((snapshot) => {
-                            const allComments = snapshot.val() || {};
-                            console.log('Firebase comment data:', allComments);
-                            
-                            Object.keys(allComments).forEach(cardId => {
-                                const comments = allComments[cardId];
-                                const count = Object.keys(comments).length;
-                                console.log(`Card ${cardId}: ${count} comments`);
-                            });
-                        })
-                        .catch((error) => {
-                            console.error('Failed to read Firebase comments:', error);
-                        });
-                }
-            };
-
+            
 
             /* ------------------------- 유튜브 모달 ------------------------- */
             let currentVideoData = {
@@ -1302,13 +1173,18 @@
                         bubble.className = 'speech-bubble';
                         bubble.textContent = message;
                         
-                        // 위치 설정 - element 기준 상대 위치로 변경
-                        bubble.style.position = 'fixed';
+                        // 위치 설정 - Safari-compatible positioning
+                        bubble.style.position = 'absolute'; // Use absolute instead of fixed for Safari
                         
                         const rect = element.getBoundingClientRect();
                         const bubbleWidth = 200; // 최대 너비
-                        const bubbleLeft = rect.left + (rect.width / 2) - (bubbleWidth / 2);
-                        const bubbleTop = rect.top - 60; // 말풍선 높이 + 여백
+                        
+                        // Calculate position relative to viewport
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                        
+                        const bubbleLeft = rect.left + scrollLeft + (rect.width / 2) - (bubbleWidth / 2);
+                        const bubbleTop = rect.top + scrollTop - 60; // 말풍선 높이 + 여백
                         
                         bubble.style.left = bubbleLeft + 'px';
                         bubble.style.top = bubbleTop + 'px';
@@ -1325,15 +1201,16 @@
                         }
                         
                         if (bubbleTop < 10) {
-                            bubble.style.top = (rect.bottom + 10) + 'px'; // 위에 공간이 없으면 아래로
+                            bubble.style.top = (rect.bottom + scrollTop + 10) + 'px'; // 위에 공간이 없으면 아래로
                         }
                         
+                        // Append to body for proper positioning
                         document.body.appendChild(bubble);
                         
-                        // 애니메이션 적용
-                        setTimeout(() => {
+                        // Safari-compatible animation
+                        requestAnimationFrame(() => {
                             bubble.classList.add('show');
-                        }, 10);
+                        });
                         
                         currentBubble = bubble;
                         
@@ -1346,25 +1223,47 @@
 
                 function hideSpeechBubble() {
                     if (currentBubble) {
+                        // Safari-compatible hiding
                         currentBubble.classList.remove('show');
+                        
+                        // Force reflow for Safari
+                        currentBubble.offsetHeight;
+                        
+                        // Use shorter timeout for Safari
                         setTimeout(() => {
-                            if (currentBubble) {
-                                currentBubble.remove();
+                            if (currentBubble && currentBubble.parentNode) {
+                                currentBubble.parentNode.removeChild(currentBubble);
                                 currentBubble = null;
                             }
                         }, 300);
+                    }
+                    
+                    // Clear timeout
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                        hideTimeout = null;
                     }
                 }
 
                 // 다른 곳 클릭 시 말풍선 숨김
                 document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.member-avatar')) {
+                    // Safari-compatible target checking
+                    const target = e.target;
+                    const isAvatar = target.closest ? target.closest('.member-avatar') : 
+                                   (target.className && target.className.indexOf('member-avatar') >= 0);
+                    
+                    if (!isAvatar) {
                         hideSpeechBubble();
                     }
                 });
 
                 document.addEventListener('touchend', function(e) {
-                    if (!e.target.closest('.member-avatar')) {
+                    // Safari-compatible target checking
+                    const target = e.target;
+                    const isAvatar = target.closest ? target.closest('.member-avatar') : 
+                                   (target.className && target.className.indexOf('member-avatar') >= 0);
+                    
+                    if (!isAvatar) {
                         hideSpeechBubble();
                     }
                 });
@@ -1377,6 +1276,13 @@
                 // 터치 스크롤 시 말풍선 숨김 (모바일 대응)
                 window.addEventListener('touchmove', function() {
                     hideSpeechBubble();
+                });
+                
+                // Safari-specific: Add visibility change listener
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        hideSpeechBubble();
+                    }
                 });
             }
 
@@ -1464,11 +1370,12 @@
         flickScript.src = "/assets/js/flicking.pkgd.min.js";
 
         flickScript.onload = () => {
-            console.log("Flicking loaded!");
+            // Flicking loaded
             
             // Firebase가 준비될 때까지 기다렸다가 startApp 실행
             if (typeof firebase !== 'undefined' && firebase.database()) {
-                console.log("Firebase ready!");
+                // Firebase ready!
+                firebaseConnected = true;
                 startApp();
             } else {
                 console.error("Firebase not loaded properly");
