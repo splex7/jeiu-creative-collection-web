@@ -273,6 +273,7 @@ body::-webkit-scrollbar {
     justify-content: center;
     align-items: center;
     margin-top: 20px;
+    margin-bottom: 30px; /* Add bottom margin to prevent overlap with cards */
     flex-wrap: wrap;
 }
 
@@ -665,6 +666,7 @@ header {
     flex-direction: column;
     justify-content: start;
     align-items: flex-start;
+    margin-bottom: 50px; /* Add bottom margin to prevent overlap with section */
 }
 
 .header-content {
@@ -1349,8 +1351,9 @@ footer {
     .shuffle-cards-btn {
         display: block;
         width: 100%;
-        margin: 10px 0;
+        margin: 5px 0;
         margin-left: 0;
+       
     }
 }
 
