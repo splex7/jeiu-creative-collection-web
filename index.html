@@ -11,14 +11,9 @@
 
     <!-- Preload Critical Resources -->
     <link rel="preload" href="styles.css" as="style">
-    <link rel="preload" href="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js" as="script">
-    <link rel="preload" href="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js" as="script">
 
     <!-- Preload Critical Images -->
     <link rel="preload" href="jeiu-logo.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="img/team_a_01r.jpg" as="image">
-    <link rel="preload" href="img/team_a_02.jpg" as="image">
-    <link rel="preload" href="img/team_b_06.jpg" as="image">
     <link rel="preload" href="faces/default.jpg" as="image">
 
     <!-- DNS Prefetch for External Resources -->
@@ -57,7 +52,7 @@
     <!-- Flicking CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.css">
 
-    <!-- CSS Polyfills -->
+    <!-- CSS Polyfills for Legacy Browser Support -->
     <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2.4.8/dist/css-vars-ponyfill.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/picturefill@3.0.3/dist/picturefill.min.js"></script>
 
@@ -87,11 +82,25 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Initialize CSS polyfills for older browsers
-        if (window.cssVars) {
-            cssVars({
-                watch: true
-            });
+        // Initialize CSS polyfills for legacy browsers (with error handling)
+        try {
+            if (typeof window.cssVars !== 'undefined') {
+                cssVars({
+                    watch: true,
+                    onlyLegacy: false // Force polyfill for better compatibility
+                });
+            }
+        } catch (e) {
+            console.warn('CSS Variables polyfill failed:', e);
+        }
+
+        // Initialize picturefill for legacy browsers
+        try {
+            if (typeof window.picturefill !== 'undefined') {
+                picturefill();
+            }
+        } catch (e) {
+            console.warn('Picturefill polyfill failed:', e);
         }
 
         // Check for backdrop-filter support
@@ -251,7 +260,7 @@
                 const isVisible = styles.display !== 'none' && styles.visibility !== 'hidden';
 
                 if (!isVisible) {
-                    console.warn('Comment button may not be visible in this browser');
+                    // console.warn('Comment button may not be visible in this browser');
                     // Apply emergency fallback
                     commentBtn.style.display = 'inline';
                     commentBtn.style.position = 'absolute';
@@ -275,6 +284,34 @@
             // Apply browser fixes immediately
             applyBrowserFixes();
 
+            // JEIU Developer Console Message
+            console.log('%c🎓 JEIU Creative Collection - Developer Console 🎓',
+                'font-size: 16px; font-weight: bold; color: #ff4d00; background: #fff; padding: 10px; border-radius: 5px; border: 2px solid #ff4d00;');
+
+            // JEIU ASCII Art (Improved Readability)
+            console.log('%c      ██╗███████╗██╗██╗   ██╗',
+                'font-size: 12px; color: #ff4d00; font-weight: bold; font-family: monospace;');
+            console.log('%c      ██║██╔════╝██║██║   ██║',
+                'font-size: 12px; color: #ff4d00; font-weight: bold; font-family: monospace;');
+            console.log('%c      ██║█████╗  ██║██║   ██║',
+                'font-size: 12px; color: #ff4d00; font-weight: bold; font-family: monospace;');
+            console.log('%c ██   ██║██╔══╝  ██║██║   ██║',
+                'font-size: 12px; color: #ff4d00; font-weight: bold; font-family: monospace;');
+            console.log('%c ╚█████╔╝███████╗██║╚██████╔╝',
+                'font-size: 12px; color: #ff4d00; font-weight: bold; font-family: monospace;');
+            console.log('%c  ╚════╝ ╚══════╝╚═╝ ╚═════╝ ',
+                'font-size: 12px; color: #ff4d00; font-weight: bold; font-family: monospace;');
+            // Graduation Message (keep this)
+            console.log('%c재능대학교 컴퓨터소프트웨어학과 졸업작품전',
+                'font-size: 14px; color: #666; font-style: italic;');
+            // Additional friendly messages (keep these)
+            console.log('%c👋 안녕하세요, 개발자 동료! 👋',
+                'font-size: 12px; color: #ff8c00; font-weight: bold;');
+            console.log('%c이 프로젝트에 대한 질문이나 제안이 있으시면 언제든지 연락주세요!',
+                'font-size: 11px; color: #888;');
+            console.log('%c🚀 함께 성장하는 개발자 커뮤니티를 응원합니다! 🚀',
+                'font-size: 11px; color: #ff4d00; font-weight: bold;');
+
             /* ------------------------------------------------------------
                 Flicking 초기화 (Flicking 로드 이후이므로 eg 100% 존재)
             ------------------------------------------------------------- */
@@ -290,6 +327,7 @@
                         bound: true,
                         panelsPerView: 3.5,
                         defaultIndex: 0,
+                        preventDefault: "false"
                     });
 
                     // Flicking 이벤트 리스너 추가
@@ -330,7 +368,7 @@
                         }
                     });
 
-                    console.log('Team data loaded:', teamData);
+                    // console.log('Team data loaded:', teamData);
 
                     Object.entries(data).forEach(([className, list]) => {
                         list.forEach(team => {
@@ -396,8 +434,8 @@
 
                     card.innerHTML = `
                         <div class="card-image" data-card-id="${p.id}">
-                            <img src="img/${p.id}.png" loading="lazy" decoding="async" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
-                            <img src="img/${p.id}r.jpg" loading="lazy" decoding="async" onerror="this.style.display='none';" class="kenburns-image">
+                            <img src="img/${p.id}.png" decoding="async" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
+                            <img data-src="img/${p.id}r.jpg" decoding="async" onerror="this.style.display='none';" class="kenburns-image lazy-image">
                             
                             <!-- 좌측 하트 버튼 -->
                             <div class="heart-count">
@@ -425,7 +463,7 @@
                                         ${p.teamMembersWithImages.map(m => `
                                             <div class="flicking-panel carousel-panel">
                                                 <div class="member-avatar">
-                                                    <img src="${m.img}" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/100/444444/FFFFFF?text=?'">
+                                                    <img src="${m.img}" decoding="async" onerror="this.src='https://via.placeholder.com/100/444444/FFFFFF?text=?'">
                                                 </div>
                                                 <div class="member-name">${m.name}</div>
                                             </div>
@@ -518,12 +556,12 @@
 
                 let isMinimized = false;
 
-                qrContainer.addEventListener('click', function(e) {
+                qrContainer.addEventListener('click', function (e) {
                     // Prevent event bubbling to avoid interfering with other interactions
                     e.stopPropagation();
-                    
+
                     isMinimized = !isMinimized;
-                    
+
                     if (isMinimized) {
                         this.classList.add('minimized');
                     } else {
@@ -532,7 +570,7 @@
                 });
 
                 // Optional: Add keyboard support (Escape to minimize, Enter to restore)
-                document.addEventListener('keydown', function(e) {
+                document.addEventListener('keydown', function (e) {
                     if (e.key === 'Escape' && qrContainer && !qrContainer.classList.contains('minimized')) {
                         qrContainer.classList.add('minimized');
                         isMinimized = true;
@@ -647,8 +685,8 @@
             function loadComments(cardId) {
                 // Use cardId as teamId since each team has one card
                 const teamId = cardId;
-
-                console.log(`Loading comments for card ${cardId}, teamId: ${teamId}`);
+                // 
+                // console.log(`Loading comments for card ${cardId}, teamId: ${teamId}`);
 
                 if (!teamId) {
                     console.warn(`No team ID found for card ${cardId}`);
@@ -1023,11 +1061,11 @@
                     return;
                 }
 
-                console.log('Initializing comment counts for', currentProjects.length, 'projects');
+                // console.log('Initializing comment counts for', currentProjects.length, 'projects');
 
                 // Load initial counts from D1 API
                 loadCommentCounts();
-                console.log('Comment counts initialized from D1 API');
+                // console.log('Comment counts initialized from D1 API');
             }
 
             // Utility functions
@@ -1178,42 +1216,46 @@
                 });
             }
 
-            // 이미지 로딩 최적화
+            // 이미지 로딩 최적화 (수동 lazy loading)
             function optimizeImageLoading() {
-                // Intersection Observer for lazy loading
+                // Intersection Observer for manual lazy loading
                 if ('IntersectionObserver' in window) {
-                    const imageObserver = new IntersectionObserver((entries, observer) => {
+                    const lazyImageObserver = new IntersectionObserver((entries, observer) => {
                         entries.forEach(entry => {
                             if (entry.isIntersecting) {
                                 const img = entry.target;
-                                img.classList.add('loaded');
+                                const dataSrc = img.getAttribute('data-src');
+
+                                if (dataSrc) {
+                                    img.src = dataSrc;
+                                    img.removeAttribute('data-src');
+                                    img.classList.remove('lazy-image');
+                                    img.classList.add('loaded');
+                                }
+
                                 observer.unobserve(img);
                             }
                         });
                     }, {
-                        rootMargin: '50px 0px',
+                        rootMargin: '100px 0px',
                         threshold: 0.01
                     });
 
-                    // Observe all lazy loaded images
-                    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-                        imageObserver.observe(img);
+                    // Observe all lazy images
+                    document.querySelectorAll('.lazy-image').forEach(img => {
+                        lazyImageObserver.observe(img);
+                    });
+                } else {
+                    // Fallback for older browsers - load all images immediately
+                    document.querySelectorAll('.lazy-image').forEach(img => {
+                        const dataSrc = img.getAttribute('data-src');
+                        if (dataSrc) {
+                            img.src = dataSrc;
+                            img.removeAttribute('data-src');
+                            img.classList.remove('lazy-image');
+                        }
                     });
                 }
-
-                // Preload critical images on hover
-                document.querySelectorAll('.card').forEach(card => {
-                    card.addEventListener('mouseenter', function () {
-                        const images = this.querySelectorAll('img[loading="lazy"]');
-                        images.forEach(img => {
-                            if (!img.complete) {
-                                const src = img.src;
-                                img.src = '';
-                                img.src = src; // Force reload
-                            }
-                        });
-                    });
-                });
             }
 
             // 이미지 에러 핸들링 개선
@@ -1230,8 +1272,16 @@
                             this.dataset.retryCount = (retryCount + 1).toString();
                             setTimeout(() => {
                                 const src = this.src;
-                                this.src = '';
-                                this.src = src;
+                                const dataSrc = this.getAttribute('data-src');
+
+                                // Retry with current src or data-src for lazy images
+                                if (dataSrc) {
+                                    this.src = '';
+                                    this.src = dataSrc;
+                                } else if (src) {
+                                    this.src = '';
+                                    this.src = src;
+                                }
                             }, 1000 * retryCount);
                         } else {
                             // Final fallback
@@ -1819,7 +1869,7 @@
 
     <!-- QR Code (Desktop Only) -->
     <div class="qr-code-container">
-        <img src="img/qrcodes.png" loading="lazy" decoding="async" alt="QR Codes" class="qr-code-image">
+        <img src="img/qrcodes.png" decoding="async" alt="QR Codes" class="qr-code-image">
         <div class="qr-code-text">
             <div class="qr-code-url">JEIU.CC</div>
             <div class="qr-code-instruction">모바일로</br>접속해주세요</div>
@@ -1980,22 +2030,22 @@
         </div>
 
     </div>
-     <footer>
-            <div class="footer-content">
-                <p>&copy; 2025 JEIU University Computer Software Dept.</br> All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="https://www.jeiu.ac.kr" target="_blank" rel="noopener" class="backlink">
-                        <span class="backlink-text">재능대학교 홈페이지</span>
-                        <span class="backlink-url">jeiu.ac.kr</span>
-                    </a>
-                    <a href="https://dept.jeiu.ac.kr/cit/main/" target="_blank" rel="noopener" class="backlink">
-                        <span class="backlink-text">컴퓨터소프트웨어학과</span>
-                        <span class="backlink-url">dept.jeiu.ac.kr/cit</span>
-                    </a>
-                    <span id="firebase-status" class="firebase-status"></span>
-                </div>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 JEIU University Computer Software Dept.</br> All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://www.jeiu.ac.kr" target="_blank" rel="noopener" class="backlink">
+                    <span class="backlink-text">재능대학교 홈페이지</span>
+                    <span class="backlink-url">jeiu.ac.kr</span>
+                </a>
+                <a href="https://dept.jeiu.ac.kr/cit/main/" target="_blank" rel="noopener" class="backlink">
+                    <span class="backlink-text">컴퓨터소프트웨어학과</span>
+                    <span class="backlink-url">dept.jeiu.ac.kr/cit</span>
+                </a>
+                <span id="firebase-status" class="firebase-status"></span>
             </div>
-        </footer>
+        </div>
+    </footer>
     <!-- Shader Script -->
     <script src="shader.js"></script>
 </body>

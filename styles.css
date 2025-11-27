@@ -1020,6 +1020,16 @@ h3 {
     transition: opacity 0.6s ease, transform 6s ease-out;
 }
 
+/* Lazy loading placeholder styles */
+.lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lazy-image.loaded {
+    opacity: 1;
+}
+
 .card-image:hover .kenburns-image {
     opacity: 1;
     transform: scale(1.15);
