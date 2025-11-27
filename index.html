@@ -301,6 +301,36 @@
             // Apply browser fixes immediately
             applyBrowserFixes();
 
+            // Loading indicator management
+            const loadingIndicator = document.getElementById('loading-indicator');
+            let loadingProgress = 0;
+            
+            function updateLoadingProgress(progress) {
+                const progressBar = loadingIndicator.querySelector('.progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+            }
+            
+            function hideLoadingIndicator() {
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingIndicator.style.display = 'none';
+                    }, 500);
+                }
+            }
+            
+            // Simulate loading progress
+            let loadingInterval = setInterval(() => {
+                loadingProgress += Math.random() * 15;
+                if (loadingProgress > 90) {
+                    loadingProgress = 90;
+                    clearInterval(loadingInterval);
+                }
+                updateLoadingProgress(loadingProgress);
+            }, 300);
+
             // JEIU Developer Console Message
             console.log('%c🎓 JEIU Creative Collection - Developer Console 🎓',
                 'font-size: 16px; font-weight: bold; color: #ff4d00; background: #fff; padding: 10px; border-radius: 5px; border: 2px solid #ff4d00;');
@@ -612,30 +642,71 @@
                 });
             }
 
-            // Parse name and affiliation from text like "김철수(교수)"
+            // Parse name and affiliation from text like "김철수(교수)" or "홍길동[개발자][팀장]"
             function parseNameAndAffiliation(fullName) {
-                // Skip if it's a company name ending with (주)
-                if (fullName.endsWith('(주)')) {
-                    return {
-                        name: escapeHtml(fullName),
-                        affiliation: null
-                    };
+                let name = fullName;
+                let affiliation = null;
+                let specialTags = [];
+
+                // Extract ALL parentheses content first
+                const parentheticalRegex = /\(([^)]+)\)/g;
+                const parentheticalMatches = [...fullName.matchAll(parentheticalRegex)];
+                
+                if (parentheticalMatches.length > 0) {
+                    // Remove all parenthetical content from name
+                    name = fullName.replace(parentheticalRegex, '').trim();
+                    
+                    // Process each parenthetical content
+                    parentheticalMatches.forEach(match => {
+                        const content = match[1].trim();
+                        
+                        // Skip if content starts with '주' (company indicator)
+                        if (content.startsWith('주')) {
+                            // Don't add as tag, just skip it
+                            return;
+                        }
+                        
+                        // Add as special tag for all other parenthetical content
+                        specialTags.push({
+                            text: escapeHtml(content),
+                            type: 'parenthesis'
+                        });
+                    });
                 }
 
-                const regex = /^(.+?)\((.+?)\)$/;
-                const match = fullName.match(regex);
-
-                if (match) {
-                    return {
-                        name: escapeHtml(match[1].trim()),
-                        affiliation: escapeHtml(match[2].trim())
-                    };
-                } else {
-                    return {
-                        name: escapeHtml(fullName),
-                        affiliation: null
-                    };
+                // Extract ALL square brackets content
+                const bracketRegex = /\[([^\]]+)\]/g;
+                const bracketMatches = [...fullName.matchAll(bracketRegex)];
+                
+                if (bracketMatches.length > 0) {
+                    // Remove all bracket content from name if not already removed
+                    if (!parentheticalMatches.length) {
+                        name = fullName.replace(bracketRegex, '').trim();
+                    }
+                    
+                    // Process each bracket content
+                    bracketMatches.forEach(match => {
+                        const content = match[1].trim();
+                        
+                        // Skip if bracket content contains '(주)' (company indicator)
+                        if (content.includes('(주)')) {
+                            // Don't add as tag, just skip it
+                            return;
+                        }
+                        
+                        // Add as special tag for all other bracket content
+                        specialTags.push({
+                            text: escapeHtml(content),
+                            type: 'bracket'
+                        });
+                    });
                 }
+
+                return {
+                    name: escapeHtml(name.trim() || fullName),
+                    affiliation: null, // No more special affiliation - everything is a tag
+                    specialTags: specialTags
+                };
             }
 
             // Get team name from card ID
@@ -783,8 +854,15 @@
                     const isOwn = isOwnComment(comment);
                     const deleteButton = isOwn ? `<button class="delete-comment-btn" onclick="deleteComment('${currentCommentCardId}', '${commentId}')">🗑️</button>` : '';
 
-                    // Parse name and affiliation
+                    // Parse name and special tags (no more affiliation)
                     const parsedName = parseNameAndAffiliation(comment.name || '익명');
+
+                    // Generate special tags HTML
+                    const specialTagsHtml = parsedName.specialTags && parsedName.specialTags.length > 0 
+                        ? parsedName.specialTags.map(tag => 
+                            `<span class="comment-special-tag ${tag.type}">${tag.text}</span>`
+                          ).join('')
+                        : '';
 
                     return `
                         <div class="comment-item ${isOwn ? 'own-comment' : ''}">
@@ -792,7 +870,7 @@
                                 <div class="comment-info">
                                     <div class="comment-name-wrapper">
                                         ${parsedName.name}
-                                        ${parsedName.affiliation ? `<span class="comment-affiliation">${parsedName.affiliation}</span>` : ''}
+                                        ${specialTagsHtml}
                                     </div>
                                     <span class="comment-time">${formatDate(comment.timestamp)}</span>
                                 </div>
@@ -1315,6 +1393,18 @@
             // 캐시 최적화 초기화
             function initializeCacheOptimization() {
                 optimizeImageLoading();
+                
+                // Hide loading indicator when content is ready
+                setTimeout(() => {
+                    if (typeof updateLoadingProgress === 'function') {
+                        updateLoadingProgress(100);
+                    }
+                    setTimeout(() => {
+                        if (typeof hideLoadingIndicator === 'function') {
+                            hideLoadingIndicator();
+                        }
+                    }, 300);
+                }, 500);
                 setupImageErrorHandling();
 
                 // Service Worker 등록 (나중에 추가 가능)
@@ -1883,6 +1973,15 @@
 </head>
 
 <body>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">JEIU Creative Collection 로딩 중...</div>
+        <div class="loading-progress">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
 
     <!-- QR Code (Desktop Only) -->
     <div class="qr-code-container">

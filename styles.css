@@ -474,6 +474,27 @@ body::-webkit-scrollbar {
     border: 1px solid rgba(255, 77, 0, 0.3);
 }
 
+.comment-special-tag {
+    font-size: 0.65rem;
+    font-weight: bold;
+    padding: 1px 3px;
+    border-radius: 2px;
+    margin-left: 2px;
+    display: inline-block;
+}
+
+.comment-special-tag.parenthesis {
+    color: #0066cc;
+    background: rgba(0, 102, 204, 0.1);
+    border: 1px solid rgba(0, 102, 204, 0.3);
+}
+
+.comment-special-tag.bracket {
+    color: #00aa44;
+    background: rgba(0, 170, 68, 0.1);
+    border: 1px solid rgba(0, 170, 68, 0.3);
+}
+
 .comment-time {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
@@ -1727,6 +1748,75 @@ footer {
         padding: 10px 12px;
         font-size: 0.85rem;
     }
+}
+
+/* --- Loading Indicator */
+.loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #5A4FCF 0%, #ff4d00 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loading-text {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.loading-progress {
+    width: 300px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes progress {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* Hide loading indicator when content is ready */
+.loading-indicator.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
 /* --- QR Code Container (Desktop Only) --- */
