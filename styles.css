@@ -1136,7 +1136,7 @@ h3 {
 }
 
 .card-team-members {
-    margin-bottom: 3rem;
+    margin-bottom: .5rem;
 }
 
 .card-team-members h4 {
@@ -1420,7 +1420,7 @@ footer {
     }
 
     .card-title-row {
-        flex-direction: column;
+        /* flex-direction: column; */
         align-items: flex-start;
         gap: 8px;
     }

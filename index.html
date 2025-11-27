@@ -430,7 +430,8 @@
 
                             all.push({
                                 id: team.id,
-                                title: team["조이름"],
+                                teamName: team["조이름"],
+                                projectTitle: team["프로젝트명"],
                                 description: team["작품설명"],
                                 platform: team["예상플랫폼"],
                                 presentationVideo: team["중간발표영상"],
@@ -497,7 +498,7 @@
 
                         <div class="card-content">
                             <div class="card-title-row">
-                                <h3 class="card-title">${p.title}</h3>
+                                <h3 class="card-title">${p.teamName}</h3>
                                 <div class="card-badges">
                                     <div class="card-badge">${p.platform}</div>
                                     <div class="card-badge class-badge">${p.class}</div>
@@ -519,9 +520,9 @@
                                 </div>
                             </div>
 
-                            <p class="card-description">${p.description}</p>
+                            <p class="card-description"><span style="font-weight: bold; font-size: 1.1em; color: #ff4d00; margin-bottom: 5px; margin-right: 2px; display: inline;">${p.projectTitle || p.teamName}</span><span style="font-weight: normal; font-size: 0.9em;">${p.description}</span></p>
                             <div class="card-links">
-                                ${(p.presentationVideo || p.finalPresentationVideo) ? `<a href="#" class="embed-video card-link" data-interim-url="${p.presentationVideo || ''}" data-final-url="${p.finalPresentationVideo || ''}" data-interim-doc-url="${p.interimDocUrl}" data-final-doc-url="${p.finalDocUrl}" data-title="${p.title}">영상 보기</a>` : ""}
+                                ${(p.presentationVideo || p.finalPresentationVideo) ? `<a href="#" class="embed-video card-link" data-interim-url="${p.presentationVideo || ''}" data-final-url="${p.finalPresentationVideo || ''}" data-interim-doc-url="${p.interimDocUrl}" data-final-doc-url="${p.finalDocUrl}" data-title="${p.teamName}">영상 보기</a>` : ""}
                                 ${p.deploymentUrl ? `<a href="${p.deploymentUrl}" target="_blank" rel="noopener" class="card-link deployment-link">바로가기</a>` : ""}
                             </div>
                         </div>
@@ -711,21 +712,9 @@
 
             // Get team name from card ID
             function getTeamName(cardId) {
-                // Map card IDs to actual team names from data.json
-                const teamNames = {
-                    'team_a_01': '코참잘',
-                    'team_a_02': '빠텐',
-                    'team_a_03': 'AI해조',
-                    'team_a_04': '로켓단',
-                    'team_a_05': '1400조',
-                    'team_b_06': '브레인핏',
-                    'team_b_07': '혼천',
-                    'team_b_08': '세얼간이',
-                    'team_b_09': '잡았조',
-                    'team_b_10': '1조답게'
-                };
-
-                return teamNames[cardId] || cardId;
+                // Find the project from currentProjects array
+                const project = currentProjects.find(p => p.id === cardId);
+                return project ? project.teamName : cardId;
             }
 
             // Open comment modal
