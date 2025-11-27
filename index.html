@@ -4,33 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <!-- Cache Optimization -->
     <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
     <meta http-equiv="ETag" content="v1.0">
-    
+
     <!-- Preload Critical Resources -->
     <link rel="preload" href="styles.css" as="style">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js" as="script">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js" as="script">
-    
+
     <!-- Preload Critical Images -->
     <link rel="preload" href="jeiu-logo.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="img/team_a_01r.jpg" as="image">
     <link rel="preload" href="img/team_a_02.jpg" as="image">
     <link rel="preload" href="img/team_b_06.jpg" as="image">
     <link rel="preload" href="faces/default.jpg" as="image">
-    
+
     <!-- DNS Prefetch for External Resources -->
     <link rel="dns-prefetch" href="//www.gstatic.com">
     <link rel="dns-prefetch" href="//firebase.googleapis.com">
     <link rel="dns-prefetch" href="//www.jeiu.ac.kr">
     <link rel="dns-prefetch" href="//dept.jeiu.ac.kr">
-    
+
     <!-- Preconnect for Critical External Resources -->
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://firebase.googleapis.com" crossorigin>
-    
+
     <meta name="title" content="재능대학교 컴퓨터소프트웨어학과 졸업작품전">
     <meta name="description"
         content="재능대학교 컴퓨터소프트웨어학과 학생들의 창의적인 졸업작품을 소개합니다. 소프트웨어 개발, 웹, 모바일, 게임, AI 프로젝트까지 다양한 작품을 감상하세요.">
@@ -56,15 +56,14 @@
 
     <!-- Flicking CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.css">
-    
+
     <!-- CSS Polyfills -->
     <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2.4.8/dist/css-vars-ponyfill.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/picturefill@3.0.3/dist/picturefill.min.js"></script>
-    
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <link rel="stylesheet" href="styles.css">
     <!-- favicon -->
@@ -87,7 +86,6 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const db = firebase.firestore();
 
         // Initialize CSS polyfills for older browsers
         if (window.cssVars) {
@@ -95,7 +93,7 @@
                 watch: true
             });
         }
-        
+
         // Check for backdrop-filter support
         if (!CSS.supports('backdrop-filter', 'blur(10px)') && !CSS.supports('-webkit-backdrop-filter', 'blur(10px)')) {
             document.documentElement.classList.add('no-backdropfilter');
@@ -109,7 +107,7 @@
             const isFirefox = userAgent.indexOf('Firefox') !== -1;
             const isChrome = userAgent.indexOf('Chrome') !== -1;
             const isSafari = userAgent.indexOf('Safari') !== -1 && !isChrome;
-            
+
             return {
                 isIE: isIE,
                 isOldIE: isOldIE,
@@ -128,7 +126,7 @@
         // Apply browser-specific fixes
         function applyBrowserFixes() {
             const browser = detectBrowser();
-            
+
             // Add IE class to html
             if (browser.isIE) {
                 document.documentElement.className += ' ie';
@@ -136,31 +134,31 @@
                     document.documentElement.className += ' lt-ie9';
                 }
             }
-            
+
             // Fix for old browsers that don't support flexbox
             if (browser.version < 30 || browser.isOldIE) {
                 document.documentElement.className += ' no-flexbox';
                 // Apply no-flexbox fallbacks
-                
+
                 // Fallback for comment and heart buttons
                 setTimeout(() => {
                     applyFlexboxFallbacks();
                 }, 1000);
             }
-            
+
             // Browser detection complete
         }
 
         // Apply flexbox fallbacks for old browsers
         function applyFlexboxFallbacks() {
             const browser = detectBrowser();
-            
+
             // Fallback for comment buttons
             document.querySelectorAll('.comment-count').forEach(btn => {
                 // Check if flexbox is not supported
                 if (!CSS.supports('display', 'flex') || browser.isOldIE || browser.version < 30) {
                     // Apply flexbox fallback to comment button
-                    
+
                     // Force inline display for old browsers
                     btn.style.display = 'inline';
                     btn.style.position = 'absolute';
@@ -174,11 +172,11 @@
                     btn.style.zIndex = '10';
                     btn.style.fontSize = '12px';
                     btn.style.fontWeight = 'bold';
-                    
+
                     // Remove flexbox properties
                     btn.style.alignItems = '';
                     btn.style.gap = '';
-                    
+
                     // Handle child elements
                     const span = btn.querySelector('span');
                     if (span) {
@@ -187,7 +185,7 @@
                         span.style.alignItems = '';
                     }
                 }
-                
+
                 // IE8 specific fallbacks
                 if (browser.isOldIE && btn.currentStyle) {
                     // Apply IE8 specific fallbacks
@@ -201,12 +199,12 @@
                     btn.style.borderRadius = '0';
                 }
             });
-            
+
             // Fallback for heart buttons
             document.querySelectorAll('.heart-count').forEach(btn => {
                 if (!CSS.supports('display', 'flex') || browser.isOldIE || browser.version < 30) {
                     // Apply flexbox fallback to heart button
-                    
+
                     btn.style.display = 'inline';
                     btn.style.position = 'absolute';
                     btn.style.top = '10px';
@@ -219,7 +217,7 @@
                     btn.style.zIndex = '10';
                     btn.style.fontSize = '12px';
                     btn.style.fontWeight = 'bold';
-                    
+
                     // Handle child elements
                     const span = btn.querySelector('span');
                     if (span) {
@@ -228,7 +226,7 @@
                         span.style.alignItems = '';
                     }
                 }
-                
+
                 // IE8 specific fallbacks
                 if (browser.isOldIE && btn.currentStyle) {
                     btn.style.display = 'inline';
@@ -241,7 +239,7 @@
                     btn.style.borderRadius = '0';
                 }
             });
-            
+
             // Flexbox fallbacks applied
         }
 
@@ -251,7 +249,7 @@
             if (commentBtn) {
                 const styles = window.getComputedStyle ? window.getComputedStyle(commentBtn) : commentBtn.currentStyle;
                 const isVisible = styles.display !== 'none' && styles.visibility !== 'hidden';
-                
+
                 if (!isVisible) {
                     console.warn('Comment button may not be visible in this browser');
                     // Apply emergency fallback
@@ -321,7 +319,7 @@
                     const data = await res.json();
 
                     let all = [];
-                    
+
                     // 팀 데이터 저장
                     teamData = {};
                     ['a반', 'b반'].forEach(className => {
@@ -331,7 +329,7 @@
                             });
                         }
                     });
-                    
+
                     console.log('Team data loaded:', teamData);
 
                     Object.entries(data).forEach(([className, list]) => {
@@ -369,10 +367,10 @@
                 }
             }
 
-        // Global variable to store current projects
-        let currentProjects = [];
+            // Global variable to store current projects
+            let currentProjects = [];
 
-        /* ----------------------------- 팀 카드 생성 ----------------------------- */
+            /* ----------------------------- 팀 카드 생성 ----------------------------- */
             async function generateTeamCards(year) {
 
                 const grid = document.getElementById("project-grid");
@@ -380,7 +378,7 @@
 
                 const students = await loadStudentData();
                 const projects = await loadProjectData(students, year);
-                
+
                 // Store projects globally for shuffling
                 currentProjects = projects;
 
@@ -466,7 +464,7 @@
                 initializeCommentCounts();
                 setupCommentModal();
                 initializeCacheOptimization(); // Add cache optimization
-                
+
                 // Test comment button visibility after rendering
                 setTimeout(() => {
                     testCommentButtonVisibility();
@@ -476,12 +474,12 @@
             // Shuffle function
             function shuffleProjects() {
                 if (currentProjects.length === 0) return;
-                
+
                 const grid = document.getElementById("project-grid");
-                
+
                 // Fade out animation
                 grid.classList.add('shuffle-fade-out');
-                
+
                 setTimeout(() => {
                     // Shuffle the projects array
                     const shuffled = [...currentProjects];
@@ -489,15 +487,15 @@
                         const j = Math.floor(Math.random() * (i + 1));
                         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                     }
-                    
+
                     // Update global variable and re-render
                     currentProjects = shuffled;
                     renderProjects(currentProjects);
-                    
+
                     // Fade in animation
                     grid.classList.remove('shuffle-fade-out');
                     grid.classList.add('shuffle-fade-in');
-                    
+
                     setTimeout(() => {
                         grid.classList.remove('shuffle-fade-in');
                     }, 500);
@@ -518,7 +516,7 @@
             // Setup comment button listeners
             function setupCommentButtonListeners() {
                 document.querySelectorAll('.comment-count').forEach(commentBtn => {
-                    commentBtn.addEventListener('click', function(e) {
+                    commentBtn.addEventListener('click', function (e) {
                         e.stopPropagation();
                         const cardId = this.dataset.cardId;
                         openCommentModal(cardId);
@@ -526,22 +524,73 @@
                 });
             }
 
+            // Parse name and affiliation from text like "김철수(교수)"
+            function parseNameAndAffiliation(fullName) {
+                // Skip if it's a company name ending with (주)
+                if (fullName.endsWith('(주)')) {
+                    return {
+                        name: escapeHtml(fullName),
+                        affiliation: null
+                    };
+                }
+
+                const regex = /^(.+?)\((.+?)\)$/;
+                const match = fullName.match(regex);
+
+                if (match) {
+                    return {
+                        name: escapeHtml(match[1].trim()),
+                        affiliation: escapeHtml(match[2].trim())
+                    };
+                } else {
+                    return {
+                        name: escapeHtml(fullName),
+                        affiliation: null
+                    };
+                }
+            }
+
+            // Get team name from card ID
+            function getTeamName(cardId) {
+                // Map card IDs to actual team names from data.json
+                const teamNames = {
+                    'team_a_01': '코참잘',
+                    'team_a_02': '빠텐',
+                    'team_a_03': 'AI해조',
+                    'team_a_04': '로켓단',
+                    'team_a_05': '1400조',
+                    'team_b_06': '브레인핏',
+                    'team_b_07': '혼천',
+                    'team_b_08': '세얼간이',
+                    'team_b_09': '잡았조',
+                    'team_b_10': '1조답게'
+                };
+
+                return teamNames[cardId] || cardId;
+            }
+
             // Open comment modal
             function openCommentModal(cardId) {
                 currentCommentCardId = cardId;
                 const modal = document.getElementById('comment-modal');
+                const titleElement = document.getElementById('comment-modal-title');
+
+                // Update modal title with team name
+                const teamName = getTeamName(cardId);
+                titleElement.textContent = `💬 ${teamName}`;
+
                 modal.style.display = 'block';
                 loadComments(cardId);
-                
+
                 // Restore saved name if exists
                 const savedName = localStorage.getItem('currentCommentName');
                 if (savedName) {
                     document.getElementById('comment-name').value = savedName;
                 }
-                
+
                 // Clear text input
                 document.getElementById('comment-text').value = '';
-                
+
                 // Refresh display after a short delay to ensure name field is considered
                 setTimeout(() => {
                     loadComments(cardId);
@@ -553,63 +602,79 @@
                 const modal = document.getElementById('comment-modal');
                 modal.style.display = 'none';
                 currentCommentCardId = null;
-                
-                // Clean up comments listener
-                if (window.currentCommentsListener) {
-                    window.currentCommentsListener();
-                    window.currentCommentsListener = null;
+
+                // Clean up comments polling
+                if (window.currentCommentsInterval) {
+                    clearInterval(window.currentCommentsInterval);
+                    window.currentCommentsInterval = null;
                 }
             }
 
-            // Load comments from Firestore (new method)
+            // Load comments from D1 API
             function loadComments(cardId) {
-                if (!firebaseConnected) return;
-                
                 // Use cardId as teamId since each team has one card
                 const teamId = cardId;
-                
+
                 console.log(`Loading comments for card ${cardId}, teamId: ${teamId}`);
-                
+
                 if (!teamId) {
                     console.warn(`No team ID found for card ${cardId}`);
                     return;
                 }
-                
+
                 // Clear comments immediately to prevent old comments from showing
                 const commentList = document.getElementById('comment-list');
                 if (commentList) {
                     commentList.innerHTML = '<div class="no-comments">로딩 중...</div>';
                 }
-                
+
                 // Clean up previous listener if exists
-                if (window.currentCommentsListener) {
-                    window.currentCommentsListener();
-                    window.currentCommentsListener = null;
+                if (window.currentCommentsInterval) {
+                    clearInterval(window.currentCommentsInterval);
+                    window.currentCommentsInterval = null;
                 }
-                
-                // Query Firestore for comments by teamId with real-time listener
-                const commentsRef = db.collection('comments').where('teamId', '==', teamId);
-                
-                // Real-time listener for Firestore (this handles both initial load and updates)
-                const unsubscribe = commentsRef.onSnapshot((querySnapshot) => {
-                    const comments = {};
-                    querySnapshot.forEach((doc) => {
-                        comments[doc.id] = doc.data();
+
+                // Load comments from D1 API
+                loadCommentsFromD1(teamId);
+
+                // Set up polling for real-time updates (every 5 seconds)
+                window.currentCommentsInterval = setInterval(() => {
+                    loadCommentsFromD1(teamId);
+                }, 5000);
+            }
+
+            // Load comments from D1 API
+            function loadCommentsFromD1(teamId) {
+                fetch(`https://jeiu.cc/api/comments?teamId=${encodeURIComponent(teamId)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const comments = {};
+                        if (data.comments && Array.isArray(data.comments)) {
+                            data.comments.forEach(comment => {
+                                comments[comment.id] = comment;
+                            });
+                        }
+                        console.log('Comments updated from D1:', Object.keys(comments).length, 'comments found');
+                        displayComments(comments);
+                    })
+                    .catch(error => {
+                        console.error('Error loading comments from D1:', error);
+                        const commentList = document.getElementById('comment-list');
+                        if (commentList) {
+                            commentList.innerHTML = '<div class="no-comments">댓글을 불러오는데 실패했습니다.</div>';
+                        }
                     });
-                    console.log('Comments updated:', Object.keys(comments).length, 'comments found');
-                    displayComments(comments);
-                }, (error) => {
-                    console.error('Real-time listener error:', error);
-                });
-                
-                // Store listener reference for cleanup
-                window.currentCommentsListener = unsubscribe;
             }
 
             // Display comments in the modal
             function displayComments(comments) {
                 const commentList = document.getElementById('comment-list');
-                
+
                 // Filter out soft-deleted comments
                 const activeComments = {};
                 Object.entries(comments).forEach(([commentId, comment]) => {
@@ -618,25 +683,29 @@
                         activeComments[commentId] = comment;
                     }
                 });
-                
+
                 const commentArray = Object.entries(activeComments).sort((a, b) => b[1].timestamp - a[1].timestamp);
-                
+
                 if (commentArray.length === 0) {
                     commentList.innerHTML = '<div class="no-comments">아직 댓글이 없습니다. 따듯한 응원의 댓글을 남겨주세요!</div>';
                     return;
                 }
-                
+
                 commentList.innerHTML = commentArray.map(([commentId, comment]) => {
                     const isOwn = isOwnComment(comment);
                     const deleteButton = isOwn ? `<button class="delete-comment-btn" onclick="deleteComment('${currentCommentCardId}', '${commentId}')">🗑️</button>` : '';
-                    const teamName = teamData[comment.teamId] || comment.teamId || '알 수 없음';
-                    
+
+                    // Parse name and affiliation
+                    const parsedName = parseNameAndAffiliation(comment.name || '익명');
+
                     return `
                         <div class="comment-item ${isOwn ? 'own-comment' : ''}">
                             <div class="comment-header">
                                 <div class="comment-info">
-                                    <span class="comment-name">${escapeHtml(comment.name || '익명')}</span>
-                                    <span class="comment-team">${escapeHtml(teamName)}</span>
+                                    <div class="comment-name-wrapper">
+                                        ${parsedName.name}
+                                        ${parsedName.affiliation ? `<span class="comment-affiliation">${parsedName.affiliation}</span>` : ''}
+                                    </div>
                                     <span class="comment-time">${formatDate(comment.timestamp)}</span>
                                 </div>
                                 ${deleteButton}
@@ -649,64 +718,55 @@
 
             // Submit comment
             function submitComment() {
-                
-                if (!firebaseConnected) {
-                    alert('Firebase에 연결되지 않았습니다. 잠시 후 다시 시도해주세요.');
-                    return;
-                }
-                
-                if (!currentCommentCardId) {
-                    alert('카드가 선택되지 않았습니다. 다시 시도해주세요.');
-                    return;
-                }
-                
+
                 const nameInput = document.getElementById('comment-name');
                 const textInput = document.getElementById('comment-text');
                 const submitBtn = document.getElementById('comment-submit');
-                
+
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
-                
+
+                if (!name || !text) {
+                    alert('이름과 댓글을 모두 입력해주세요.');
+                    return;
+                }
+
+                // Disable submit button to prevent double submission
+                submitBtn.disabled = true;
+                submitBtn.textContent = '전송 중...';
+
                 // Validate required fields
-                if (!name) {
-                    alert('이름을 입력해주세요.');
-                    nameInput.focus();
-                    return;
-                }
-                
-                if (!text) {
-                    alert('댓글 내용을 입력해주세요.');
-                    textInput.focus();
-                    return;
-                }
-                
                 if (name.length < 2) {
                     alert('이름은 최소 2자 이상 입력해주세요.');
                     nameInput.focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '보내기';
                     return;
                 }
-                
+
                 if (text.length < 2) {
                     alert('댓글은 최소 2자 이상 입력해주세요.');
                     textInput.focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '보내기';
                     return;
                 }
-                
+
                 if (name.length > 50) {
                     alert('이름은 50자 이내로 입력해주세요.');
                     nameInput.focus();
                     return;
                 }
-                
+
                 if (text.length > 500) {
                     alert('댓글은 500자 이내로 입력해주세요.');
                     textInput.focus();
                     return;
                 }
-                
+
                 // Get project info for teamId
                 const project = currentProjects.find(p => p.cardId === currentCommentCardId);
-                
+
                 const comment = {
                     name: name,
                     text: text,
@@ -715,41 +775,58 @@
                     cardId: currentCommentCardId,
                     teamId: currentCommentCardId // Use cardId as teamId
                 };
-                
-                // Add to Firestore
-                db.collection('comments').add(comment)
-                    .then((docRef) => {
-                        console.log('Comment added with ID:', docRef.id);
-                        
+
+                // Add to D1 database
+                fetch('https://jeiu.cc/api/comments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        text: text,
+                        authorId: generateAuthorId(name),
+                        cardId: currentCommentCardId,
+                        teamId: currentCommentCardId
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Comment added with ID:', data.id);
+
                         // Save current name to localStorage
                         const name = nameInput.value.trim();
                         localStorage.setItem('currentCommentName', name);
-                        
+
                         // Clear form
                         nameInput.value = '';
                         textInput.value = '';
-                        updateCharCount();
-                        
-                        // Close modal
-                        closeCommentModal();
-                        
-                        // The real-time listener will automatically update the comments
+
+                        // Refresh comments immediately (keep modal open)
+                        loadComments(currentCommentCardId);
+
                         console.log('Comment submitted successfully');
                     })
                     .catch((error) => {
                         console.error('댓글 전송 실패:', error);
-                        console.error('Error details:', error.code, error.message);
-                        
+
                         let errorMessage = '댓글 전송에 실패했습니다. 다시 시도해주세요.';
-                        
-                        if (error.code === 'PERMISSION_DENIED') {
-                            errorMessage = '댓글 작성 권한이 없습니다. 관리자에게 문의해주세요.';
-                        } else if (error.code === 'NETWORK_ERROR') {
+
+                        if (error.message.includes('400')) {
+                            errorMessage = '입력값이 올바르지 않습니다. 다시 확인해주세요.';
+                        } else if (error.message.includes('500')) {
+                            errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                        } else if (error.message.includes('NETWORK')) {
                             errorMessage = '네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인해주세요.';
                         }
-                        
+
                         alert(errorMessage);
-                        
+
                         // Re-enable button
                         submitBtn.disabled = false;
                         submitBtn.textContent = '보내기';
@@ -760,7 +837,7 @@
             function generateAuthorId(name) {
                 const nameKey = name.toLowerCase().trim();
                 let authorId = localStorage.getItem(`authorId_${nameKey}`);
-                
+
                 if (!authorId) {
                     // Create a simple fingerprint from browser info
                     const fingerprint = navigator.userAgent + navigator.language + screen.width + screen.height;
@@ -774,25 +851,30 @@
                     }
                     localStorage.setItem(`authorId_${nameKey}`, authorId);
                 }
-                
+
                 return authorId;
             }
 
-            // Delete comment from Firestore
-            window.deleteComment = function(cardId, commentId) {
-                if (!firebaseConnected) {
-                    alert('Firebase에 연결되지 않았습니다.');
-                    return;
-                }
-                
+            // Delete comment from D1 database
+            window.deleteComment = function (cardId, commentId) {
                 if (!confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
                     return;
                 }
-                
-                const commentRef = db.collection('comments').doc(commentId);
-                commentRef.delete()
-                    .then(() => {
-                        // Comment deleted successfully
+
+                fetch(`https://jeiu.cc/api/comments?commentId=${encodeURIComponent(commentId)}&teamId=${encodeURIComponent(cardId)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Comment deleted successfully');
                         // Refresh comments
                         loadComments(cardId);
                     })
@@ -804,31 +886,34 @@
 
             // Check if comment is written by current user
             function isOwnComment(comment) {
-                if (!comment.authorId) return false;
-                
+                if (!comment.author_id) return false;
+
                 // Try to get current author ID from localStorage for all possible names
                 const storedNames = Object.keys(localStorage).filter(key => key.startsWith('authorId_'));
-                
+
                 for (const storageKey of storedNames) {
                     const storedAuthorId = localStorage.getItem(storageKey);
-                    if (storedAuthorId === comment.authorId) {
+                    if (storedAuthorId === comment.author_id) {
                         return true;
                     }
                 }
-                
+
                 // Also check current name field if filled
-                const name = document.getElementById('comment-name').value.trim();
-                if (name) {
-                    const authorId = generateAuthorId(name);
-                    return comment.authorId === authorId;
+                const currentNameField = document.getElementById('comment-name');
+                if (currentNameField && currentNameField.value.trim()) {
+                    const currentNameKey = currentNameField.value.trim().toLowerCase();
+                    const currentAuthorId = localStorage.getItem(`authorId_${currentNameKey}`);
+                    if (currentAuthorId === comment.author_id) {
+                        return true;
+                    }
                 }
-                
+
                 return false;
             }
 
             // Update comment count
             function updateCommentCount(cardId, count) {
-                
+
                 const commentBtn = document.querySelector(`.comment-count[data-card-id="${cardId}"]`);
                 if (commentBtn) {
                     const commentNumber = commentBtn.querySelector('.comment-number');
@@ -843,125 +928,73 @@
                 }
             }
 
-            // Load all comment counts from Firestore
+            // Load all comment counts from D1 API
             function loadCommentCounts() {
-                if (!firebaseConnected) return;
-                
-                // Get all comments from Firestore
-                db.collection('comments').get().then((querySnapshot) => {
-                    const commentsByTeam = {};
-                    
-                    querySnapshot.forEach((doc) => {
-                        const comment = doc.data();
-                        // Only count active (non-deleted) comments
-                        if (!comment.deleted) {
-                            const teamId = comment.teamId;
-                            
-                            if (!commentsByTeam[teamId]) {
-                                commentsByTeam[teamId] = [];
+                // Get comment counts from D1 API
+                fetch('https://jeiu.cc/api/comment-counts')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update counts for each card
+                        document.querySelectorAll('.comment-count').forEach(commentBtn => {
+                            const cardId = commentBtn.dataset.cardId;
+
+                            if (data.counts && data.counts[cardId]) {
+                                const count = data.counts[cardId];
+                                updateCommentCount(cardId, count);
+                            } else {
+                                updateCommentCount(cardId, 0);
                             }
-                            commentsByTeam[teamId].push(comment);
-                        }
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Error loading comment counts:', error);
                     });
-                    
-                    // Update counts for each card
-                    document.querySelectorAll('.comment-count').forEach(commentBtn => {
-                        const cardId = commentBtn.dataset.cardId;
-                        
-                        if (commentsByTeam[cardId]) {
-                            const count = commentsByTeam[cardId].length;
-                            updateCommentCount(cardId, count);
-                        } else {
-                            updateCommentCount(cardId, 0);
-                        }
-                    });
-                }).catch((error) => {
-                    console.error('Error loading comment counts:', error);
-                });
-                
-                // Add real-time listener for comment count updates
-                db.collection('comments').onSnapshot((querySnapshot) => {
-                    const commentsByTeam = {};
-                    
-                    querySnapshot.forEach((doc) => {
-                        const comment = doc.data();
-                        // Only count active (non-deleted) comments
-                        if (!comment.deleted) {
-                            const teamId = comment.teamId;
-                            
-                            if (!commentsByTeam[teamId]) {
-                                commentsByTeam[teamId] = [];
+
+                // Set up polling for comment count updates (every 10 seconds)
+                setInterval(() => {
+                    fetch('https://jeiu.cc/api/comment-counts')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
                             }
-                            commentsByTeam[teamId].push(comment);
-                        }
-                    });
-                    
-                    // Update counts for each card
-                    document.querySelectorAll('.comment-count').forEach(commentBtn => {
-                        const cardId = commentBtn.dataset.cardId;
-                        
-                        if (commentsByTeam[cardId]) {
-                            const count = commentsByTeam[cardId].length;
-                            updateCommentCount(cardId, count);
-                        } else {
-                            updateCommentCount(cardId, 0);
-                        }
-                    });
-                }, (error) => {
-                    console.error('Real-time comment count listener error:', error);
-                });
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Update counts for each card
+                            document.querySelectorAll('.comment-count').forEach(commentBtn => {
+                                const cardId = commentBtn.dataset.cardId;
+
+                                if (data.counts && data.counts[cardId]) {
+                                    const count = data.counts[cardId];
+                                    updateCommentCount(cardId, count);
+                                } else {
+                                    updateCommentCount(cardId, 0);
+                                }
+                            });
+                        })
+                        .catch((error) => {
+                            console.error('Error polling comment counts:', error);
+                        });
+                }, 10000);
             }
 
             // Initialize comment counts (separate function for initial load)
             function initializeCommentCounts() {
-                if (!firebaseConnected || currentProjects.length === 0) {
+                if (currentProjects.length === 0) {
                     setTimeout(initializeCommentCounts, 1000);
                     return;
                 }
-                
+
                 console.log('Initializing comment counts for', currentProjects.length, 'projects');
-                
-                // First load initial counts
-                db.collection('comments').get().then((querySnapshot) => {
-                    const commentsByTeam = {};
-                    
-                    querySnapshot.forEach((doc) => {
-                        const comment = doc.data();
-                        // Only count active (non-deleted) comments
-                        if (!comment.deleted) {
-                            const teamId = comment.teamId;
-                            
-                            if (!commentsByTeam[teamId]) {
-                                commentsByTeam[teamId] = [];
-                            }
-                            commentsByTeam[teamId].push(comment);
-                        }
-                    });
-                    
-                    console.log('Comments by team:', commentsByTeam);
-                    
-                    const commentButtons = document.querySelectorAll('.comment-count');
-                    console.log('Found comment buttons:', commentButtons.length);
-                    
-                    commentButtons.forEach(commentBtn => {
-                        const cardId = commentBtn.dataset.cardId;
-                        
-                        console.log(`Card ${cardId}`);
-                        
-                        if (commentsByTeam[cardId]) {
-                            const count = commentsByTeam[cardId].length;
-                            updateCommentCount(cardId, count);
-                            console.log(`Updated count for ${cardId}: ${count}`);
-                        } else {
-                            updateCommentCount(cardId, 0);
-                            console.log(`No comments for ${cardId}, set to 0`);
-                        }
-                    });
-                    
-                    console.log('Comment counts initialized from Firestore');
-                }).catch((error) => {
-                    console.error('Error initializing comment counts:', error);
-                });
+
+                // Load initial counts from D1 API
+                loadCommentCounts();
+                console.log('Comment counts initialized from D1 API');
             }
 
             // Utility functions
@@ -976,30 +1009,30 @@
                 const date = new Date(timestamp);
                 const now = new Date();
                 const diff = now - date;
-                
+
                 // 1분 이내: "방금 전"
                 if (diff < 60000) {
                     return '방금 전';
                 }
-                
+
                 // 1시간 이내: "X분 전"
                 if (diff < 3600000) {
                     const minutes = Math.floor(diff / 60000);
                     return `${minutes}분 전`;
                 }
-                
+
                 // 24시간 이내: "X시간 전"
                 if (diff < 86400000) {
                     const hours = Math.floor(diff / 3600000);
                     return `${hours}시간 전`;
                 }
-                
+
                 // 7일 이내: "X일 전"
                 if (diff < 604800000) {
                     const days = Math.floor(diff / 86400000);
                     return `${days}일 전`;
                 }
-                
+
                 // 그 외: 날짜 표시
                 return date.toLocaleDateString('ko-KR', {
                     year: 'numeric',
@@ -1014,12 +1047,12 @@
                 const date = new Date(timestamp);
                 const now = new Date();
                 const diff = now - date;
-                
+
                 if (diff < 60000) return '방금';
                 if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
                 if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
                 if (diff < 604800000) return `${Math.floor(diff / 86400000)}일 전`;
-                
+
                 return date.toLocaleDateString('ko-KR');
             }
 
@@ -1027,15 +1060,15 @@
             function setupCommentModal() {
                 // Close button
                 document.getElementById('close-comment-modal').addEventListener('click', closeCommentModal);
-                
+
                 // Submit button
                 document.getElementById('comment-submit').addEventListener('click', submitComment);
-                
+
                 // Name field validation and character count
-                document.getElementById('comment-name').addEventListener('input', function() {
+                document.getElementById('comment-name').addEventListener('input', function () {
                     const name = this.value.trim();
                     localStorage.setItem('currentCommentName', name);
-                    
+
                     // Update character count
                     const nameCount = document.getElementById('name-count');
                     if (nameCount) {
@@ -1046,17 +1079,17 @@
                             nameCount.classList.remove('warning');
                         }
                     }
-                    
+
                     // Refresh comments to show/hide delete buttons
                     if (currentCommentCardId) {
                         loadComments(currentCommentCardId);
                     }
                 });
-                
+
                 // Text field validation and character count
-                document.getElementById('comment-text').addEventListener('input', function() {
+                document.getElementById('comment-text').addEventListener('input', function () {
                     const text = this.value.trim();
-                    
+
                     // Update character count
                     const textCount = document.getElementById('text-count');
                     if (textCount) {
@@ -1068,49 +1101,49 @@
                         }
                     }
                 });
-                
+
                 // Enter key handling for name field
-                document.getElementById('comment-name').addEventListener('keypress', function(e) {
+                document.getElementById('comment-name').addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         document.getElementById('comment-text').focus();
                     }
                 });
-                
+
                 // Emoji insertion function
                 function insertEmoji(emoji) {
                     const textArea = document.getElementById('comment-text');
                     const start = textArea.selectionStart;
                     const end = textArea.selectionEnd;
-                    
+
                     const text = textArea.value;
-                    
+
                     const newText = text.substring(0, start) + emoji + text.substring(end);
                     textArea.value = newText;
-                    
+
                     // Set cursor position after emoji
                     textArea.focus();
                     textArea.setSelectionRange(start + emoji.length, start + emoji.length);
-                    
+
                     // Trigger input event to update character count
                     textArea.dispatchEvent(new Event('input'));
                 }
-                
+
                 // Emoji button click handlers
                 document.querySelectorAll('.emoji-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
+                    btn.addEventListener('click', function () {
                         const emoji = this.dataset.emoji;
                         insertEmoji(emoji);
                     });
                 });
-                
+
                 // Close modal when clicking outside
-                document.getElementById('comment-modal').addEventListener('click', function(e) {
+                document.getElementById('comment-modal').addEventListener('click', function (e) {
                     if (e.target === this) {
                         closeCommentModal();
                     }
                 });
-                
+
                 // Test Firebase permissions
                 testFirebasePermissions();
             }
@@ -1140,7 +1173,7 @@
 
                 // Preload critical images on hover
                 document.querySelectorAll('.card').forEach(card => {
-                    card.addEventListener('mouseenter', function() {
+                    card.addEventListener('mouseenter', function () {
                         const images = this.querySelectorAll('img[loading="lazy"]');
                         images.forEach(img => {
                             if (!img.complete) {
@@ -1156,12 +1189,12 @@
             // 이미지 에러 핸들링 개선
             function setupImageErrorHandling() {
                 document.querySelectorAll('img').forEach(img => {
-                    img.addEventListener('error', function() {
+                    img.addEventListener('error', function () {
                         // Add retry mechanism
                         if (!this.dataset.retryCount) {
                             this.dataset.retryCount = '0';
                         }
-                        
+
                         const retryCount = parseInt(this.dataset.retryCount);
                         if (retryCount < 3) {
                             this.dataset.retryCount = (retryCount + 1).toString();
@@ -1186,7 +1219,7 @@
             function initializeCacheOptimization() {
                 optimizeImageLoading();
                 setupImageErrorHandling();
-                
+
                 // Service Worker 등록 (나중에 추가 가능)
                 if ('serviceWorker' in navigator) {
                     // Service Worker 등록 코드는 나중에 추가
@@ -1196,7 +1229,7 @@
             // Test Firebase permissions for comments
             function testFirebasePermissions() {
                 if (!firebaseConnected || !db) return;
-                
+
                 // Test read permission
                 db.collection('comments').limit(1).get()
                     .then(() => {
@@ -1205,7 +1238,7 @@
                     .catch((error) => {
                         console.error('✗ Comments read permission:', error.code, error.message);
                     });
-                
+
                 // Test writing comments (with a test document)
                 const testDoc = {
                     name: 'test',
@@ -1214,7 +1247,7 @@
                     cardId: 'test',
                     teamId: 'test'
                 };
-                
+
                 db.collection('comments').add(testDoc)
                     .then((docRef) => {
                         // Comments write permission: OK
@@ -1223,7 +1256,7 @@
                     })
                     .catch((error) => {
                         console.error('✗ Comments write permission:', error.code, error.message);
-                        
+
                         if (error.code === 'PERMISSION_DENIED') {
                             alert('Firebase 댓글 쓰기 권한이 없습니다. Firebase 규칙을 확인해주세요.\nFirebase Console → Firestore Database → Rules에서 comments 컬렉션의 쓰기 권한을 확인하세요.');
                         }
@@ -1236,7 +1269,7 @@
                 interimDocUrl: '',
                 finalDocUrl: ''
             };
-            
+
             let teamData = {}; // 팀 데이터 저장
 
             function extractVideoId(url) {
@@ -1366,11 +1399,11 @@
             function checkFirebaseConnection() {
                 const statusElement = document.getElementById('firebase-status');
                 const connectedRef = database.ref('.info/connected');
-                
+
                 connectedRef.on('value', (snapshot) => {
                     const connected = snapshot.val();
                     firebaseConnected = connected;
-                    
+
                     if (connected) {
                         // 연결되면 하트 기능 활성화
                         if (!heartFunctionsEnabled) {
@@ -1387,17 +1420,17 @@
                 if (!firebaseConnected || !heartFunctionsEnabled) {
                     return;
                 }
-                
+
                 try {
                     const heartRef = database.ref(`hearts/${cardId}`);
-                    
+
                     const snapshot = await heartRef.once('value');
                     const currentCount = snapshot.val() || 0;
-                    
+
                     // 하트 추가 (무제한)
                     const newCount = currentCount + 1;
                     await heartRef.set(newCount);
-                    
+
                 } catch (error) {
                     console.error('하트 카운트 변경 실패:', error);
                 }
@@ -1408,7 +1441,7 @@
                     const heartsRef = database.ref('hearts');
                     heartsRef.on('value', (snapshot) => {
                         const heartsData = snapshot.val() || {};
-                        
+
                         document.querySelectorAll('.card-image').forEach(cardImage => {
                             const cardId = cardImage.dataset.cardId;
                             const heartNumber = cardImage.querySelector('.heart-number');
@@ -1424,24 +1457,24 @@
 
             function setupHeartClickListeners() {
                 document.querySelectorAll('.card-image').forEach(cardImage => {
-                    cardImage.addEventListener('click', function(e) {
+                    cardImage.addEventListener('click', function (e) {
                         const cardId = this.dataset.cardId;
-                        
+
                         // 0.5초 연타 방지
                         if (heartClickTimeouts[cardId]) {
                             return;
                         }
-                        
+
                         heartClickTimeouts[cardId] = true;
                         setTimeout(() => {
                             delete heartClickTimeouts[cardId];
                         }, 500);
-                        
+
                         // 하트 애니메이션 생성 - 카드 내 상대 위치로 수정
                         const rect = this.getBoundingClientRect();
                         const x = e.clientX - rect.left;
                         const y = e.clientY - rect.top;
-                        
+
                         const heart = document.createElement('div');
                         heart.className = 'heart-animation';
                         heart.innerHTML = '❤️';
@@ -1453,7 +1486,7 @@
                         setTimeout(() => {
                             heart.remove();
                         }, 1500);
-                        
+
                         // 하트 카운트 증가
                         incrementHeartCount(cardId);
                     });
@@ -1473,28 +1506,28 @@
                 setTimeout(() => {
                     document.querySelectorAll('.member-avatar').forEach(avatar => {
                         // mousedown 이벤트로 변경
-                        avatar.addEventListener('mousedown', function(e) {
+                        avatar.addEventListener('mousedown', function (e) {
                             e.preventDefault();
                             e.stopPropagation();
-                            
+
                             const memberName = this.parentElement.querySelector('.member-name').textContent;
                             showSpeechBubble(this, memberName);
                         });
 
                         // 모바일 터치 이벤트 추가
-                        avatar.addEventListener('touchstart', function(e) {
+                        avatar.addEventListener('touchstart', function (e) {
                             e.preventDefault();
                             e.stopPropagation();
-                            
+
                             const memberName = this.parentElement.querySelector('.member-name').textContent;
                             showSpeechBubble(this, memberName);
                         });
 
                         // 모바일에서 터치 후 뗄 때도 트리거 (안정성 확보)
-                        avatar.addEventListener('touchend', function(e) {
+                        avatar.addEventListener('touchend', function (e) {
                             e.preventDefault();
                             e.stopPropagation();
-                            
+
                             const memberName = this.parentElement.querySelector('.member-name').textContent;
                             showSpeechBubble(this, memberName);
                         });
@@ -1507,9 +1540,9 @@
                         lastRequestedBubble = { element, studentName };
                         return;
                     }
-                    
+
                     isCreatingBubble = true;
-                    
+
                     // 기존 말풍선 즉시 제거
                     if (currentBubble) {
                         if (currentBubble.parentNode) {
@@ -1526,54 +1559,54 @@
                     loadStudentData().then(students => {
                         const studentData = students[studentName];
                         const message = studentData?.소감 || "후회없는 캡스톤이었어!";
-                        
+
                         // 말풍선 생성
                         const bubble = document.createElement('div');
                         bubble.className = 'speech-bubble';
                         bubble.textContent = message;
-                        
+
                         // 위치 설정 - Safari-compatible positioning
                         bubble.style.position = 'absolute'; // Use absolute instead of fixed for Safari
-                        
+
                         const rect = element.getBoundingClientRect();
                         const bubbleWidth = 200; // 최대 너비
-                        
+
                         // Calculate position relative to viewport
                         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
                         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-                        
+
                         const bubbleLeft = rect.left + scrollLeft + (rect.width / 2) - (bubbleWidth / 2);
                         const bubbleTop = rect.top + scrollTop - 60; // 말풍선 높이 + 여백
-                        
+
                         bubble.style.left = bubbleLeft + 'px';
                         bubble.style.top = bubbleTop + 'px';
                         bubble.style.width = bubbleWidth + 'px';
-                        
+
                         // 화면 경계 체크
                         const screenWidth = window.innerWidth;
                         const screenHeight = window.innerHeight;
-                        
+
                         if (bubbleLeft < 10) {
                             bubble.style.left = '10px';
                         } else if (bubbleLeft + bubbleWidth > screenWidth - 10) {
                             bubble.style.left = (screenWidth - bubbleWidth - 10) + 'px';
                         }
-                        
+
                         if (bubbleTop < 10) {
                             bubble.style.top = (rect.bottom + scrollTop + 10) + 'px'; // 위에 공간이 없으면 아래로
                         }
-                        
+
                         // Append to body for proper positioning
                         document.body.appendChild(bubble);
-                        
+
                         // Safari-compatible animation
                         requestAnimationFrame(() => {
                             bubble.classList.add('show');
                         });
-                        
+
                         currentBubble = bubble;
                         isCreatingBubble = false;
-                        
+
                         // Check if there's a pending request
                         if (lastRequestedBubble) {
                             const pending = lastRequestedBubble;
@@ -1583,7 +1616,7 @@
                                 setTimeout(() => showSpeechBubble(pending.element, pending.studentName), 100);
                             }
                         }
-                        
+
                         // 3초 후 자동 숨김
                         hideTimeout = setTimeout(() => {
                             hideSpeechBubble();
@@ -1595,10 +1628,10 @@
                     if (currentBubble) {
                         // Safari-compatible hiding
                         currentBubble.classList.remove('show');
-                        
+
                         // Force reflow for Safari
                         currentBubble.offsetHeight;
-                        
+
                         // Use shorter timeout for Safari
                         setTimeout(() => {
                             if (currentBubble && currentBubble.parentNode) {
@@ -1607,7 +1640,7 @@
                             }
                         }, 300);
                     }
-                    
+
                     // Clear timeout
                     if (hideTimeout) {
                         clearTimeout(hideTimeout);
@@ -1616,40 +1649,40 @@
                 }
 
                 // 다른 곳 클릭 시 말풍선 숨김
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     // Safari-compatible target checking
                     const target = e.target;
-                    const isAvatar = target.closest ? target.closest('.member-avatar') : 
-                                   (target.className && target.className.indexOf('member-avatar') >= 0);
-                    
+                    const isAvatar = target.closest ? target.closest('.member-avatar') :
+                        (target.className && target.className.indexOf('member-avatar') >= 0);
+
                     if (!isAvatar) {
                         hideSpeechBubble();
                     }
                 });
 
-                document.addEventListener('touchend', function(e) {
+                document.addEventListener('touchend', function (e) {
                     // Safari-compatible target checking
                     const target = e.target;
-                    const isAvatar = target.closest ? target.closest('.member-avatar') : 
-                                   (target.className && target.className.indexOf('member-avatar') >= 0);
-                    
+                    const isAvatar = target.closest ? target.closest('.member-avatar') :
+                        (target.className && target.className.indexOf('member-avatar') >= 0);
+
                     if (!isAvatar) {
                         hideSpeechBubble();
                     }
                 });
 
                 // 스크롤 시 말풍선 숨김
-                window.addEventListener('scroll', function() {
+                window.addEventListener('scroll', function () {
                     hideSpeechBubble();
                 });
 
                 // 터치 스크롤 시 말풍선 숨김 (모바일 대응)
-                window.addEventListener('touchmove', function() {
+                window.addEventListener('touchmove', function () {
                     hideSpeechBubble();
                 });
-                
+
                 // Safari-specific: Add visibility change listener
-                document.addEventListener('visibilitychange', function() {
+                document.addEventListener('visibilitychange', function () {
                     if (document.hidden) {
                         hideSpeechBubble();
                     }
@@ -1662,21 +1695,21 @@
                 const exhibitionModal = document.getElementById('exhibition-modal');
                 const exhibitionClose = document.getElementById('close-exhibition-modal');
                 const exhibitionFrame = document.getElementById('exhibition-video-frame');
-                
+
                 const exhibitionVideoId = '_fo7yEdSQVA';
                 const exhibitionVideoUrl = `https://www.youtube.com/embed/${exhibitionVideoId}?autoplay=1&rel=0&modestbranding=1`;
 
-                exhibitionBtn.addEventListener('click', function() {
+                exhibitionBtn.addEventListener('click', function () {
                     exhibitionModal.style.display = 'block';
                     exhibitionFrame.src = exhibitionVideoUrl;
                     document.body.style.overflow = 'hidden';
                 });
 
-                exhibitionClose.addEventListener('click', function() {
+                exhibitionClose.addEventListener('click', function () {
                     closeExhibitionModal();
                 });
 
-                exhibitionModal.addEventListener('click', function(e) {
+                exhibitionModal.addEventListener('click', function (e) {
                     if (e.target === exhibitionModal) {
                         closeExhibitionModal();
                     }
@@ -1695,21 +1728,21 @@
                 const fieldModal = document.getElementById('field-modal');
                 const fieldClose = document.getElementById('close-field-modal');
                 const fieldFrame = document.getElementById('field-video-frame');
-                
+
                 const fieldVideoId = 'b8AS-b1fMn4';
                 const fieldVideoUrl = `https://www.youtube.com/embed/${fieldVideoId}?autoplay=1&rel=0&modestbranding=1`;
 
-                fieldBtn.addEventListener('click', function() {
+                fieldBtn.addEventListener('click', function () {
                     fieldModal.style.display = 'block';
                     fieldFrame.src = fieldVideoUrl;
                     document.body.style.overflow = 'hidden';
                 });
 
-                fieldClose.addEventListener('click', function() {
+                fieldClose.addEventListener('click', function () {
                     closeFieldModal();
                 });
 
-                fieldModal.addEventListener('click', function(e) {
+                fieldModal.addEventListener('click', function (e) {
                     if (e.target === fieldModal) {
                         closeFieldModal();
                     }
@@ -1762,7 +1795,7 @@
             /* -------------------------- 초기 실행 -------------------------- */
             setupArchiveMenu();
             generateTeamCards("2025");
-            
+
             // Firebase 연결 확인 시작
             setTimeout(() => {
                 checkFirebaseConnection();
@@ -1774,7 +1807,7 @@
 
         flickScript.onload = () => {
             // Flicking loaded
-            
+
             // Firebase가 준비될 때까지 기다렸다가 startApp 실행
             if (typeof firebase !== 'undefined' && firebase.database()) {
                 // Firebase ready!
@@ -1834,7 +1867,7 @@
                     재능대학교 컴퓨터소프트웨어학과 졸업작품 아카이브.<br>
                     학생들의 열정과 기술이 담긴 프로젝트들을 영구히 기록합니다.
                 </p>
-                
+
                 <marquee class="heart-instruction">마음에 드는 프로젝트에 하트를 눌러주세요!</marquee>
 
                 <!-- 버튼 컨테이너 -->
@@ -1843,12 +1876,12 @@
                     <button id="exhibition-video-btn" class="action-btn exhibition-video-btn" data-text="최종발표">
                         🎬 최종 발표
                     </button>
-                    
+
                     <!-- 현장영상 버튼 -->
                     <button id="field-video-btn" class="action-btn field-video-btn" data-text="현장영상">
                         📹 현장 영상
                     </button>
-                    
+
                     <!-- 셔플 카드 버튼 -->
                     <button id="shuffle-cards-btn" class="action-btn shuffle-cards-btn" data-text="카드섞기">
                         🔀 카드 섞기
@@ -1866,13 +1899,9 @@
             <div class="exhibition-modal-content">
                 <span class="exhibition-close" id="close-exhibition-modal">&times;</span>
                 <div class="exhibition-video-container">
-                    <iframe id="exhibition-video-frame" 
-                            width="100%" 
-                            height="100%" 
-                            src="" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen>
+                    <iframe id="exhibition-video-frame" width="100%" height="100%" src="" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
                     </iframe>
                 </div>
             </div>
@@ -1883,13 +1912,9 @@
             <div class="exhibition-modal-content">
                 <span class="exhibition-close" id="close-field-modal">&times;</span>
                 <div class="exhibition-video-container">
-                    <iframe id="field-video-frame" 
-                            width="100%" 
-                            height="100%" 
-                            src="" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen>
+                    <iframe id="field-video-frame" width="100%" height="100%" src="" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
                     </iframe>
                 </div>
             </div>
@@ -1916,46 +1941,55 @@
         <div id="comment-modal" class="comment-modal">
             <div class="comment-modal-content">
                 <div class="comment-modal-header">
-                    <h3>💬 댓글</h3>
+                    <h3 id="comment-modal-title">💬 댓글</h3>
                     <span class="comment-close" id="close-comment-modal">&times;</span>
                 </div>
-                
+
                 <!-- 댓글 리스트 (2/3) -->
                 <div class="comment-list-container">
                     <div class="comment-list" id="comment-list">
                         <!-- 댓글들이 동적으로 추가됩니다 -->
                     </div>
                 </div>
-                
-                <!-- 댓글 입력창 (1/3) -->
+
+                <!-- 댓글 입력창 (최소화) -->
                 <div class="comment-input-container">
                     <div class="comment-input-form">
-                        <input type="text" id="comment-name" placeholder="이름 (2-50자)" maxlength="50" class="comment-name-input">
-                        <div class="char-count" id="name-count" style="text-align: right; font-size: 0.8rem; color: #666; margin-top: -5px; margin-bottom: 5px;">0/50</div>
-                        <textarea id="comment-text" placeholder="댓글을 남겨주세요... (2-500자)" maxlength="500" class="comment-text-input"></textarea>
-                        <div class="char-count" id="text-count" style="text-align: right; font-size: 0.8rem; color: #666; margin-top: -5px; margin-bottom: 5px;">0/500</div>
-                        
-                        <!-- 감정 이모지 선택기 -->
-                        <div class="emoji-picker">
-                            <span class="emoji-label">감정 표현:</span>
-                            <div class="emoji-list">
-                                <button class="emoji-btn" data-emoji="❤️">❤️</button>
-                                <button class="emoji-btn" data-emoji="👍">👍</button>
-                                <button class="emoji-btn" data-emoji="😊">😊</button>
-                                <button class="emoji-btn" data-emoji="🎉">🎉</button>
-                                <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                        <input type="text" id="comment-name" placeholder="이름 / 예: 김철수(OO 기업 대표)" maxlength="50"
+                            class="comment-name-input">
+                        <div class="char-count" id="name-count"
+                            style="text-align: right; font-size: 0.7rem; color: #666; margin-top: -3px; margin-bottom: 3px;">
+                            0/50</div>
+                        <textarea id="comment-text" placeholder="댓글을 남겨주세요... (2-500자)" maxlength="500"
+                            class="comment-text-input"></textarea>
+                        <div class="char-count" id="text-count"
+                            style="text-align: right; font-size: 0.7rem; color: #666; margin-top: -3px; margin-bottom: 8px;">
+                            0/500</div>
+
+                        <!-- 감정표현과 전송 버튼을 같은 열에 -->
+                        <div class="emoji-submit-row">
+                            <!-- 감정 이모지 선택기 -->
+                            <div class="emoji-picker">
+                                <div class="emoji-list">
+                                    <button class="emoji-btn" data-emoji="❤️">❤️</button>
+                                    <button class="emoji-btn" data-emoji="👍">👍</button>
+                                    <button class="emoji-btn" data-emoji="😊">😊</button>
+                                    <button class="emoji-btn" data-emoji="🎉">🎉</button>
+                                    <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                                </div>
                             </div>
+
+                            <button id="comment-submit" class="comment-submit-btn">보내기</button>
                         </div>
-                        
-                        <button id="comment-submit" class="comment-submit-btn">보내기</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <footer>
+    </div>
+     <footer>
             <div class="footer-content">
-                <p>&copy; 2025 JEIU University Computer Software Dept. All rights reserved.</p>
+                <p>&copy; 2025 JEIU University Computer Software Dept.</br> All rights reserved.</p>
                 <div class="footer-links">
                     <a href="https://www.jeiu.ac.kr" target="_blank" rel="noopener" class="backlink">
                         <span class="backlink-text">재능대학교 홈페이지</span>
@@ -1969,8 +2003,6 @@
                 </div>
             </div>
         </footer>
-    </div>
-
     <!-- Shader Script -->
     <script src="shader.js"></script>
 </body>

@@ -1,1 +1,0 @@
-1400조 최종발표 : https://www.miricanvas.com/v/155u23q
