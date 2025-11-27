@@ -460,6 +460,7 @@
                 setupExhibitionVideo();
                 setupFieldVideo();
                 setupShuffleButton();
+                setupQRContainer();
                 setupCommentButtonListeners();
                 initializeCommentCounts();
                 setupCommentModal();
@@ -508,6 +509,38 @@
                 if (shuffleBtn) {
                     shuffleBtn.addEventListener('click', shuffleProjects);
                 }
+            }
+
+            // Setup QR container toggle functionality
+            function setupQRContainer() {
+                const qrContainer = document.querySelector('.qr-code-container');
+                if (!qrContainer) return;
+
+                let isMinimized = false;
+
+                qrContainer.addEventListener('click', function(e) {
+                    // Prevent event bubbling to avoid interfering with other interactions
+                    e.stopPropagation();
+                    
+                    isMinimized = !isMinimized;
+                    
+                    if (isMinimized) {
+                        this.classList.add('minimized');
+                    } else {
+                        this.classList.remove('minimized');
+                    }
+                });
+
+                // Optional: Add keyboard support (Escape to minimize, Enter to restore)
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && qrContainer && !qrContainer.classList.contains('minimized')) {
+                        qrContainer.classList.add('minimized');
+                        isMinimized = true;
+                    } else if (e.key === 'Enter' && qrContainer && qrContainer.classList.contains('minimized') && document.activeElement === qrContainer) {
+                        qrContainer.classList.remove('minimized');
+                        isMinimized = false;
+                    }
+                });
             }
 
             // Comment system variables
@@ -1143,9 +1176,6 @@
                         closeCommentModal();
                     }
                 });
-
-                // Test Firebase permissions
-                testFirebasePermissions();
             }
 
             // 이미지 로딩 최적화
@@ -1224,43 +1254,6 @@
                 if ('serviceWorker' in navigator) {
                     // Service Worker 등록 코드는 나중에 추가
                 }
-            }
-
-            // Test Firebase permissions for comments
-            function testFirebasePermissions() {
-                if (!firebaseConnected || !db) return;
-
-                // Test read permission
-                db.collection('comments').limit(1).get()
-                    .then(() => {
-                        // Comments read permission: OK
-                    })
-                    .catch((error) => {
-                        console.error('✗ Comments read permission:', error.code, error.message);
-                    });
-
-                // Test writing comments (with a test document)
-                const testDoc = {
-                    name: 'test',
-                    text: 'test',
-                    timestamp: Date.now(),
-                    cardId: 'test',
-                    teamId: 'test'
-                };
-
-                db.collection('comments').add(testDoc)
-                    .then((docRef) => {
-                        // Comments write permission: OK
-                        // Clean up test data
-                        docRef.delete();
-                    })
-                    .catch((error) => {
-                        console.error('✗ Comments write permission:', error.code, error.message);
-
-                        if (error.code === 'PERMISSION_DENIED') {
-                            alert('Firebase 댓글 쓰기 권한이 없습니다. Firebase 규칙을 확인해주세요.\nFirebase Console → Firestore Database → Rules에서 comments 컬렉션의 쓰기 권한을 확인하세요.');
-                        }
-                    });
             }
             let currentVideoData = {
                 interimUrl: '',

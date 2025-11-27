@@ -1736,10 +1736,60 @@ footer {
     -moz-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    -webkit-transition: -webkit-transform 0.3s ease, opacity 0.3s ease;
-    -moz-transition: -moz-transform 0.3s ease, opacity 0.3s ease;
-    -o-transition: -o-transform 0.3s ease, opacity 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -moz-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -o-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Minimized state */
+.qr-code-container.minimized {
+    top: 80px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    padding: 5px;
+    border-radius: 25px;
+    overflow: hidden;
+    transform: scale(0.8);
+    opacity: 0.8;
+}
+
+.qr-code-container.minimized:hover {
+    transform: scale(0.85);
+    opacity: 0.9;
+}
+
+.qr-code-container.minimized .qr-code-image {
+    display: none;
+}
+
+.qr-code-container.minimized .qr-code-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff4d00;
+    margin: 0;
+}
+
+.qr-code-container.minimized .qr-code-url,
+.qr-code-container.minimized .qr-code-instruction {
+    display: none;
+}
+
+/* Show QR text only when minimized */
+.qr-code-container.minimized .qr-code-text::after {
+    content: 'QR';
+    display: block;
 }
 
 /* Fallback for browsers without backdrop-filter support */
@@ -1756,7 +1806,7 @@ footer {
     border: 2px solid #e0e0e0;
 }
 
-.qr-code-container:hover {
+.qr-code-container:hover:not(.minimized) {
     transform: scale(1.05);
     -webkit-transform: scale(1.05);
     -moz-transform: scale(1.05);
