@@ -21,7 +21,7 @@
 jeiu-creative-collection/
 ├── index.html          # 메인 웹페이지
 ├── jeiu-logo.svg       # 재능대학교 로고
-├── data.json           # 졸업작품 데이터
+├── data.json           # 졸업작품 데이터 (레거시)
 ├── students.json       # 학생 정보 데이터
 ├── example.webp        # 예시 이미지
 ├── faces/              # 학생 얼굴 사진 폴더
@@ -31,7 +31,22 @@ jeiu-creative-collection/
 
 ## 📊 데이터 구조
 
-### data.json
+### D1 Database (Teams)
+팀 데이터는 이제 D1 데이터베이스에 저장됩니다:
+
+**teams 테이블:**
+- `id`: 고유 팀 ID (예: "team_a_01")
+- `team_name`: 팀 이름
+- `project_name`: 프로젝트 이름
+- `members`: 팀원 배열 (JSON)
+- `class_name`: 반 이름 ("a반", "b반")
+- 기타 프로젝트 정보 필드
+
+### API 엔드포인트
+- `GET /api/teams`: 모든 팀 데이터 조회
+- `POST /api/teams`: 새 팀 생성
+
+### students.json (레거시)
 - `a반`, `b반`: 반별 팀 정보
 - `조이름`: 팀명
 - `조원`: 팀 구성원 배열
@@ -66,23 +81,34 @@ jeiu-creative-collection/
 ## 🔧 커스터마이징
 
 ### 데이터 추가
-새로운 졸업작품을 추가하려면 `data.json` 파일에 다음과 같은 형식으로 데이터를 추가하세요:
+새로운 졸업작품을 추가하려면 D1 데이터베이스에 직접 데이터를 추가하거나 API를 사용하세요:
 
-```json
-{
-  "id": "team_a_06",
-  "조이름": "팀 이름",
-  "조원": ["학생1", "학생2", "학생3"],
-  "작품설명": "작품에 대한 설명",
-  "예상플랫폼": "데스크톱 또는 모바일",
-  "최종발표영상": "https://youtu.be/영상ID",
-  "중간발표영상": "https://youtu.be/영상ID",
-  "최종발표자": ["학생1", "학생2"],
-  "판넬제출여부": "Y"
-}
+**API를 통한 추가:**
+```bash
+curl -X POST https://jeiu.cc/api/teams \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "team_a_06",
+    "team_name": "새팀",
+    "project_name": "새프로젝트",
+    "class_name": "a반",
+    "members": ["팀원1", "팀원2"]
+  }'
 ```
 
-학생 사진을 추가하려면 `faces/` 폴더에 이미지를 넣고 `students.json`에 경로를 추가하세요.
+**데이터베이스 직접 추가:**
+```sql
+INSERT INTO teams (
+    id, team_name, project_name, class_name, members
+) VALUES (
+    'team_a_06', '새팀', '새프로젝트', 'a반', '["팀원1", "팀원2"]'
+);
+```
+
+### 이미지 추가
+1. `faces/` 폴더에 학생 얼굴 사진을 추가합니다.
+2. 파일 이름은 학생 이름과 일치시킵니다 (예: `홍길동.jpg`).
+3. 지원되는 형식: `.jpg`, `.jpeg`, `.png`, `.webp`
 
 ## 📜 라이선스
 

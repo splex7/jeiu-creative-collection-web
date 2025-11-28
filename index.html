@@ -397,10 +397,10 @@
                 }
             }
 
-            /* ------------------------ 프로젝트 JSON 로드 ------------------------ */
+            /* ------------------------ 프로젝트 데이터 로드 ------------------------ */
             async function loadProjectData(studentData, year) {
                 try {
-                    const res = await fetch("data.json");
+                    const res = await fetch("/api/teams");
                     const data = await res.json();
 
                     let all = [];

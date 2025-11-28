@@ -3,6 +3,7 @@
 
 import { onRequestGet, onRequestPost, onRequestDelete as deleteComment } from '../api/comments.js';
 import { onRequestGet as getCommentCounts } from '../api/comment-counts.js';
+import { onRequestGet as getTeams, onRequestPost as createTeam } from '../api/teams.js';
 
 export default {
     async fetch(request, env, ctx) {
@@ -59,6 +60,12 @@ export default {
             } else if (path.startsWith('/api/comment-counts')) {
                 if (request.method === 'GET') {
                     return addCorsHeaders(await getCommentCounts({ request, env }));
+                }
+            } else if (path.startsWith('/api/teams')) {
+                if (request.method === 'GET') {
+                    return addCorsHeaders(await getTeams({ request, env }));
+                } else if (request.method === 'POST') {
+                    return addCorsHeaders(await createTeam({ request, env }));
                 }
             } else if (path.startsWith('/api/hearts')) {
             // Hearts functionality remains in Firebase Realtime Database
