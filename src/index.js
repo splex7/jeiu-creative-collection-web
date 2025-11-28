@@ -67,6 +67,34 @@ export default {
                 } else if (request.method === 'POST') {
                     return addCorsHeaders(await createTeam({ request, env }));
                 }
+            } else if (path.startsWith('/api/debug')) {
+                // Debug endpoint to test D1 connection
+                try {
+                    const testResult = await env.DB.prepare('SELECT COUNT(*) as count FROM teams').first();
+                    return addCorsHeaders(new Response(JSON.stringify({ 
+                        d1_connected: true,
+                        environment: env.ENVIRONMENT,
+                        db_exists: !!env.DB,
+                        team_count: testResult?.count || 0,
+                        timestamp: new Date().toISOString()
+                    }), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }));
+                } catch (error) {
+                    return addCorsHeaders(new Response(JSON.stringify({ 
+                        d1_connected: false,
+                        error: error.message,
+                        environment: env.ENVIRONMENT,
+                        db_exists: !!env.DB
+                    }), {
+                        status: 500,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }));
+                }
             } else if (path.startsWith('/api/hearts')) {
             // Hearts functionality remains in Firebase Realtime Database
             // Return 404 for hearts API endpoints

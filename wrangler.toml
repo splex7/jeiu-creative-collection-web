@@ -24,4 +24,4 @@ name = "jeiu-creative-collection-dev"
 [[env.development.d1_databases]]
 binding = "DB"
 database_name = "jeiu-comments"
-database_id = "local"
+database_id = "366d7bc0-8973-4fa9-b61b-ec521993c3ea"
