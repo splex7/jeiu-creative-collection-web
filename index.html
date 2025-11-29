@@ -401,7 +401,7 @@
             async function loadProjectData(studentData, year) {
                 try {
                     const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                    const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : ''; // Temporarily use production for testing
+                    const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : '';
                     const res = await fetch(`${apiBaseUrl}/api/teams`);
                     const data = await res.json();
 
@@ -882,7 +882,9 @@
                 const nameInput = document.getElementById('comment-name');
                 const textInput = document.getElementById('comment-text');
                 const submitBtn = document.getElementById('comment-submit');
-                console.log('Button element found:', submitBtn, 'Initial disabled state:', submitBtn.disabled);
+                if (isLocalDevelopment) {
+                    console.log('Button element found:', submitBtn, 'Initial disabled state:', submitBtn.disabled);
+                }
 
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
@@ -933,7 +935,9 @@
                 const project = Array.isArray(currentProjects)
                     ? currentProjects.find(p => p.id === currentCommentCardId)
                     : null;
-                console.log('Project lookup result:', project, 'for cardId:', currentCommentCardId);
+                if (isLocalDevelopment) {
+                    console.log('Project lookup result:', project, 'for cardId:', currentCommentCardId);
+                }
 
                 const comment = {
                     name: name,
@@ -946,8 +950,10 @@
 
                 // Determine API endpoint based on environment
                 const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc'; // Temporarily use production for testing
-                console.log('Environment:', { isLocalDevelopment, apiBaseUrl, hostname: window.location.hostname });
+                const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc';
+                if (isLocalDevelopment) {
+                    console.log('Environment:', { isLocalDevelopment, apiBaseUrl, hostname: window.location.hostname });
+                }
 
                 // Add to D1 database
                 fetch(`${apiBaseUrl}/api/comments`, {
@@ -964,15 +970,18 @@
                     })
                 })
                     .then(response => {
-                        console.log('API Response status:', response.status);
+                        if (isLocalDevelopment) {
+                            console.log('API Response status:', response.status);
+                        }
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Comment added with ID:', data.id);
-                        console.log('Button state before re-enabling:', submitBtn.disabled, submitBtn.textContent);
+                        if (isLocalDevelopment) {
+                            console.log('Comment added with ID:', data.id);
+                        }
 
                         // Save current name to localStorage
                         const name = nameInput.value.trim();
@@ -983,51 +992,61 @@
                         textInput.value = '';
 
                         // Re-enable button and restore original text
-                        console.log('About to re-enable button. Current state:', {
-                            disabled: submitBtn.disabled,
-                            text: submitBtn.textContent,
-                            element: submitBtn,
-                            tagName: submitBtn.tagName,
-                            id: submitBtn.id
-                        });
+                        if (isLocalDevelopment) {
+                            console.log('About to re-enable button. Current state:', {
+                                disabled: submitBtn.disabled,
+                                text: submitBtn.textContent,
+                                element: submitBtn,
+                                tagName: submitBtn.tagName,
+                                id: submitBtn.id
+                            });
+                        }
                         
                         submitBtn.disabled = false;
                         submitBtn.textContent = '보내기';
                         
-                        console.log('Button state after immediate re-enabling:', {
-                            disabled: submitBtn.disabled,
-                            text: submitBtn.textContent,
-                            computedStyle: window.getComputedStyle(submitBtn).pointerEvents
-                        });
+                        if (isLocalDevelopment) {
+                            console.log('Button state after immediate re-enabling:', {
+                                disabled: submitBtn.disabled,
+                                text: submitBtn.textContent,
+                                computedStyle: window.getComputedStyle(submitBtn).pointerEvents
+                            });
+                        }
                         
                         // Failsafe: Force button state after a short delay
                         setTimeout(() => {
                             submitBtn.disabled = false;
                             submitBtn.textContent = '보내기';
-                            console.log('Button state after failsafe:', {
-                                disabled: submitBtn.disabled,
-                                text: submitBtn.textContent,
-                                computedStyle: window.getComputedStyle(submitBtn).pointerEvents
-                            });
-                            
-                            // Check for CSS overrides
-                            const cssRules = window.getComputedStyle(submitBtn);
-                            console.log('Button CSS properties:', {
-                                pointerEvents: cssRules.pointerEvents,
-                                cursor: cssRules.cursor,
-                                opacity: cssRules.opacity,
-                                disabled: cssRules.disabled
-                            });
+                            if (isLocalDevelopment) {
+                                console.log('Button state after failsafe:', {
+                                    disabled: submitBtn.disabled,
+                                    text: submitBtn.textContent,
+                                    computedStyle: window.getComputedStyle(submitBtn).pointerEvents
+                                });
+                                
+                                // Check for CSS overrides
+                                const cssRules = window.getComputedStyle(submitBtn);
+                                console.log('Button CSS properties:', {
+                                    pointerEvents: cssRules.pointerEvents,
+                                    cursor: cssRules.cursor,
+                                    opacity: cssRules.opacity,
+                                    disabled: cssRules.disabled
+                                });
+                            }
                             
                             // Refresh comments after button is fully restored
                             loadComments(currentCommentCardId);
                         }, 100);
 
-                        console.log('Comment submitted successfully');
+                        if (isLocalDevelopment) {
+                            console.log('Comment submitted successfully');
+                        }
                     })
                     .catch((error) => {
                         console.error('댓글 전송 실패:', error);
-                        console.log('Button state in catch block before re-enabling:', submitBtn.disabled, submitBtn.textContent);
+                        if (isLocalDevelopment) {
+                            console.log('Button state in catch block before re-enabling:', submitBtn.disabled, submitBtn.textContent);
+                        }
 
                         let errorMessage = '댓글 전송에 실패했습니다. 다시 시도해주세요.';
 
@@ -1044,7 +1063,9 @@
                         // Re-enable button
                         submitBtn.disabled = false;
                         submitBtn.textContent = '보내기';
-                        console.log('Button state in catch block after re-enabling:', submitBtn.disabled, submitBtn.textContent);
+                        if (isLocalDevelopment) {
+                            console.log('Button state in catch block after re-enabling:', submitBtn.disabled, submitBtn.textContent);
+                        }
                     });
             }
 
