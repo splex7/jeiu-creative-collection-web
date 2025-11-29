@@ -22,6 +22,10 @@ zone_name = "jeiu.cc"
 name = "jeiu-creative-collection-dev"
 
 [[env.development.d1_databases]]
-binding = "DB"
-database_name = "jeiu-comments"
-database_id = "366d7bc0-8973-4fa9-b61b-ec521993c3ea"
+binding = "jeiu_comments_local"
+database_name = "jeiu-comments-local"
+database_id = "3c6ef890-3450-424f-9a9c-5f5c8bf00300"
+
+# Local development variables
+[env.development.vars]
+ENVIRONMENT = "development"

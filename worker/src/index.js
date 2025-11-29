@@ -10,17 +10,6 @@ export default {
         const url = new URL(request.url);
         const path = url.pathname;
 
-        // Serve static files for non-API routes
-        if (!path.startsWith('/api/')) {
-            // Serve index.html for root path
-            if (path === '/') {
-                return env.ASSETS.fetch(new Request('http://localhost/index.html'));
-            }
-            
-            // Serve other static files
-            return env.ASSETS.fetch(request);
-        }
-
         // CORS headers for all responses
         const corsHeaders = {
             'Access-Control-Allow-Origin': '*',

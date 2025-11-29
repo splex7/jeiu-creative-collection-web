@@ -44,9 +44,9 @@
     <meta name="twitter:image" content="https://jeiu.cc/thumbnail.jpg">
     <link rel="canonical" href="https://jeiu.cc">
     <meta name="theme-color" content="#5A4FCF">
-    
 
-    
+
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -304,14 +304,14 @@
             // Loading indicator management
             const loadingIndicator = document.getElementById('loading-indicator');
             let loadingProgress = 0;
-            
+
             function updateLoadingProgress(progress) {
                 const progressBar = loadingIndicator.querySelector('.progress-bar');
                 if (progressBar) {
                     progressBar.style.width = progress + '%';
                 }
             }
-            
+
             function hideLoadingIndicator() {
                 if (loadingIndicator) {
                     loadingIndicator.classList.add('hidden');
@@ -320,7 +320,7 @@
                     }, 500);
                 }
             }
-            
+
             // Simulate loading progress
             let loadingInterval = setInterval(() => {
                 loadingProgress += Math.random() * 15;
@@ -400,7 +400,9 @@
             /* ------------------------ 프로젝트 데이터 로드 ------------------------ */
             async function loadProjectData(studentData, year) {
                 try {
-                    const res = await fetch("/api/teams");
+                    const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : ''; // Temporarily use production for testing
+                    const res = await fetch(`${apiBaseUrl}/api/teams`);
                     const data = await res.json();
 
                     let all = [];
@@ -652,21 +654,21 @@
                 // Extract ALL parentheses content first
                 const parentheticalRegex = /\(([^)]+)\)/g;
                 const parentheticalMatches = [...fullName.matchAll(parentheticalRegex)];
-                
+
                 if (parentheticalMatches.length > 0) {
                     // Remove all parenthetical content from name
                     name = fullName.replace(parentheticalRegex, '').trim();
-                    
+
                     // Process each parenthetical content
                     parentheticalMatches.forEach(match => {
                         const content = match[1].trim();
-                        
+
                         // Skip if content starts with '주' (company indicator)
                         if (content.startsWith('주')) {
                             // Don't add as tag, just skip it
                             return;
                         }
-                        
+
                         // Add as special tag for all other parenthetical content
                         specialTags.push({
                             text: escapeHtml(content),
@@ -678,23 +680,23 @@
                 // Extract ALL square brackets content
                 const bracketRegex = /\[([^\]]+)\]/g;
                 const bracketMatches = [...fullName.matchAll(bracketRegex)];
-                
+
                 if (bracketMatches.length > 0) {
                     // Remove all bracket content from name if not already removed
                     if (!parentheticalMatches.length) {
                         name = fullName.replace(bracketRegex, '').trim();
                     }
-                    
+
                     // Process each bracket content
                     bracketMatches.forEach(match => {
                         const content = match[1].trim();
-                        
+
                         // Skip if bracket content contains '(주)' (company indicator)
                         if (content.includes('(주)')) {
                             // Don't add as tag, just skip it
                             return;
                         }
-                        
+
                         // Add as special tag for all other bracket content
                         specialTags.push({
                             text: escapeHtml(content),
@@ -793,7 +795,10 @@
 
             // Load comments from D1 API
             function loadCommentsFromD1(teamId) {
-                fetch(`https://jeiu.cc/api/comments?teamId=${encodeURIComponent(teamId)}`)
+                const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc'; // Temporarily use production for testing
+                
+                fetch(`${apiBaseUrl}/api/comments?teamId=${encodeURIComponent(teamId)}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
@@ -847,10 +852,10 @@
                     const parsedName = parseNameAndAffiliation(comment.name || '익명');
 
                     // Generate special tags HTML
-                    const specialTagsHtml = parsedName.specialTags && parsedName.specialTags.length > 0 
-                        ? parsedName.specialTags.map(tag => 
+                    const specialTagsHtml = parsedName.specialTags && parsedName.specialTags.length > 0
+                        ? parsedName.specialTags.map(tag =>
                             `<span class="comment-special-tag ${tag.type}">${tag.text}</span>`
-                          ).join('')
+                        ).join('')
                         : '';
 
                     return `
@@ -877,6 +882,7 @@
                 const nameInput = document.getElementById('comment-name');
                 const textInput = document.getElementById('comment-text');
                 const submitBtn = document.getElementById('comment-submit');
+                console.log('Button element found:', submitBtn, 'Initial disabled state:', submitBtn.disabled);
 
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
@@ -910,17 +916,24 @@
                 if (name.length > 50) {
                     alert('이름은 50자 이내로 입력해주세요.');
                     nameInput.focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '보내기';
                     return;
                 }
 
                 if (text.length > 500) {
                     alert('댓글은 500자 이내로 입력해주세요.');
                     textInput.focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '보내기';
                     return;
                 }
 
                 // Get project info for teamId
-                const project = currentProjects.find(p => p.cardId === currentCommentCardId);
+                const project = Array.isArray(currentProjects)
+                    ? currentProjects.find(p => p.id === currentCommentCardId)
+                    : null;
+                console.log('Project lookup result:', project, 'for cardId:', currentCommentCardId);
 
                 const comment = {
                     name: name,
@@ -931,8 +944,13 @@
                     teamId: currentCommentCardId // Use cardId as teamId
                 };
 
+                // Determine API endpoint based on environment
+                const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc'; // Temporarily use production for testing
+                console.log('Environment:', { isLocalDevelopment, apiBaseUrl, hostname: window.location.hostname });
+
                 // Add to D1 database
-                fetch('https://jeiu.cc/api/comments', {
+                fetch(`${apiBaseUrl}/api/comments`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -946,6 +964,7 @@
                     })
                 })
                     .then(response => {
+                        console.log('API Response status:', response.status);
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
@@ -953,6 +972,7 @@
                     })
                     .then(data => {
                         console.log('Comment added with ID:', data.id);
+                        console.log('Button state before re-enabling:', submitBtn.disabled, submitBtn.textContent);
 
                         // Save current name to localStorage
                         const name = nameInput.value.trim();
@@ -962,13 +982,52 @@
                         nameInput.value = '';
                         textInput.value = '';
 
-                        // Refresh comments immediately (keep modal open)
-                        loadComments(currentCommentCardId);
+                        // Re-enable button and restore original text
+                        console.log('About to re-enable button. Current state:', {
+                            disabled: submitBtn.disabled,
+                            text: submitBtn.textContent,
+                            element: submitBtn,
+                            tagName: submitBtn.tagName,
+                            id: submitBtn.id
+                        });
+                        
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '보내기';
+                        
+                        console.log('Button state after immediate re-enabling:', {
+                            disabled: submitBtn.disabled,
+                            text: submitBtn.textContent,
+                            computedStyle: window.getComputedStyle(submitBtn).pointerEvents
+                        });
+                        
+                        // Failsafe: Force button state after a short delay
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '보내기';
+                            console.log('Button state after failsafe:', {
+                                disabled: submitBtn.disabled,
+                                text: submitBtn.textContent,
+                                computedStyle: window.getComputedStyle(submitBtn).pointerEvents
+                            });
+                            
+                            // Check for CSS overrides
+                            const cssRules = window.getComputedStyle(submitBtn);
+                            console.log('Button CSS properties:', {
+                                pointerEvents: cssRules.pointerEvents,
+                                cursor: cssRules.cursor,
+                                opacity: cssRules.opacity,
+                                disabled: cssRules.disabled
+                            });
+                            
+                            // Refresh comments after button is fully restored
+                            loadComments(currentCommentCardId);
+                        }, 100);
 
                         console.log('Comment submitted successfully');
                     })
                     .catch((error) => {
                         console.error('댓글 전송 실패:', error);
+                        console.log('Button state in catch block before re-enabling:', submitBtn.disabled, submitBtn.textContent);
 
                         let errorMessage = '댓글 전송에 실패했습니다. 다시 시도해주세요.';
 
@@ -985,6 +1044,7 @@
                         // Re-enable button
                         submitBtn.disabled = false;
                         submitBtn.textContent = '보내기';
+                        console.log('Button state in catch block after re-enabling:', submitBtn.disabled, submitBtn.textContent);
                     });
             }
 
@@ -1016,7 +1076,10 @@
                     return;
                 }
 
-                fetch(`https://jeiu.cc/api/comments?commentId=${encodeURIComponent(commentId)}&teamId=${encodeURIComponent(cardId)}`, {
+                const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc'; // Temporarily use production for testing
+
+                fetch(`${apiBaseUrl}/api/comments?commentId=${encodeURIComponent(commentId)}&teamId=${encodeURIComponent(cardId)}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1382,7 +1445,7 @@
             // 캐시 최적화 초기화
             function initializeCacheOptimization() {
                 optimizeImageLoading();
-                
+
                 // Hide loading indicator when content is ready
                 setTimeout(() => {
                     if (typeof updateLoadingProgress === 'function') {
