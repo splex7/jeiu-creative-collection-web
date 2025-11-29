@@ -1,7 +1,7 @@
 name = "jeiu-creative-collection"
 main = "worker/src/index.js"
 compatibility_date = "2024-01-01"
-account_id = "${CLOUDFLARE_ACCOUNT_ID}"
+account_id = "abcdef12345678901234567890123456"
 
 # Assets directory for static files
 [assets]
