@@ -971,9 +971,6 @@
                     })
                 })
                     .then(response => {
-                        if (isLocalDevelopment) {
-                            console.log('API Response status:', response.status);
-                        }
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
@@ -988,9 +985,11 @@
                         const name = nameInput.value.trim();
                         localStorage.setItem('currentCommentName', name);
 
-                        // Clear form
-                        nameInput.value = '';
+                        // Clear only the comment text, keep the name for convenience
                         textInput.value = '';
+
+                        // Refresh comments from server
+                        loadComments(currentCommentCardId);
 
                         // Re-enable button and restore original text
                         if (isLocalDevelopment) {
@@ -1034,9 +1033,6 @@
                                     disabled: cssRules.disabled
                                 });
                             }
-                            
-                            // Refresh comments after button is fully restored
-                            loadComments(currentCommentCardId);
                         }, 100);
 
                         if (isLocalDevelopment) {
