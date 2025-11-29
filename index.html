@@ -878,6 +878,8 @@
 
             // Submit comment
             function submitComment() {
+                // Determine environment first
+                const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
                 const nameInput = document.getElementById('comment-name');
                 const textInput = document.getElementById('comment-text');
@@ -949,7 +951,6 @@
                 };
 
                 // Determine API endpoint based on environment
-                const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
                 const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc';
                 if (isLocalDevelopment) {
                     console.log('Environment:', { isLocalDevelopment, apiBaseUrl, hostname: window.location.hostname });
