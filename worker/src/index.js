@@ -1,14 +1,25 @@
 // Cloudflare Workers main entry point
 // Routes API requests to appropriate handlers
 
-import { onRequestGet, onRequestPost, onRequestDelete as deleteComment } from '../api/comments.js';
-import { onRequestGet as getCommentCounts } from '../api/comment-counts.js';
-import { onRequestGet as getTeams, onRequestPost as createTeam } from '../api/teams.js';
+import { onRequestGet, onRequestPost, onRequestDelete as deleteComment } from './handlers/comments.js';
+import { onRequestGet as getCommentCounts } from './handlers/comment-counts.js';
+import { onRequestGet as getTeams, onRequestPost as createTeam } from './handlers/teams.js';
 
 export default {
     async fetch(request, env, ctx) {
         const url = new URL(request.url);
         const path = url.pathname;
+
+        // Serve static files for non-API routes
+        if (!path.startsWith('/api/')) {
+            // Serve index.html for root path
+            if (path === '/') {
+                return env.ASSETS.fetch(new Request('http://localhost/index.html'));
+            }
+            
+            // Serve other static files
+            return env.ASSETS.fetch(request);
+        }
 
         // CORS headers for all responses
         const corsHeaders = {

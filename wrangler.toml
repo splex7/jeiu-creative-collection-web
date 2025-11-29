@@ -1,12 +1,18 @@
 name = "jeiu-creative-collection"
-main = "src/index.js"
+main = "worker/src/index.js"
 compatibility_date = "2024-01-01"
+
+# Assets directory for static files
+[assets]
+directory = "./public"
+binding = "ASSETS"
 
 # D1 Database binding
 [[d1_databases]]
 binding = "DB"
 database_name = "jeiu-comments"
 database_id = "366d7bc0-8973-4fa9-b61b-ec521993c3ea"
+remote = true
 
 # Environment variables
 [vars]

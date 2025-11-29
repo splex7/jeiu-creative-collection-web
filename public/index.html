@@ -10,11 +10,11 @@
     <meta http-equiv="ETag" content="v1.0">
 
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="assets/css/styles.css" as="style">
 
     <!-- Preload Critical Images -->
-    <link rel="preload" href="jeiu-logo.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="faces/default.jpg" as="image">
+    <link rel="preload" href="assets/images/ui/jeiu-logo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="assets/images/faces/default.jpg" as="image">
 
     <!-- DNS Prefetch for External Resources -->
     <link rel="dns-prefetch" href="//www.gstatic.com">
@@ -77,12 +77,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <!-- favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest">
 
     <script>
         // Firebase 초기화
@@ -390,7 +390,7 @@
             /* ------------------------ 학생 JSON 로드 ------------------------ */
             async function loadStudentData() {
                 try {
-                    const res = await fetch("students.json");
+                    const res = await fetch("assets/data/students.json");
                     return await res.json();
                 } catch {
                     return {};
@@ -482,8 +482,8 @@
 
                     card.innerHTML = `
                         <div class="card-image" data-card-id="${p.id}">
-                            <img src="img/${p.id}.png" decoding="async" onerror="this.src='img/${p.id}.jpg'; this.onerror=function(){this.src='img/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
-                            <img data-src="img/${p.id}r.jpg" decoding="async" onerror="this.style.display='none';" class="kenburns-image lazy-image">
+                            <img src="assets/images/teams/${p.id}.png" decoding="async" onerror="this.src='assets/images/teams/${p.id}.jpg'; this.onerror=function(){this.src='assets/images/teams/example.webp'; this.onerror=function(){this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#ff4d00,#ff8c00)';};};">
+                            <img data-src="assets/images/teams/${p.id}r.jpg" decoding="async" onerror="this.style.display='none';" class="kenburns-image lazy-image">
                             
                             <!-- 좌측 하트 버튼 -->
                             <div class="heart-count">
@@ -1942,7 +1942,7 @@
         }
 
         const flickScript = document.createElement("script");
-        flickScript.src = "/assets/js/flicking.pkgd.min.js";
+        flickScript.src = "/assets/js/lib/flicking.pkgd.min.js";
 
         flickScript.onload = () => {
             // Flicking loaded
@@ -1974,7 +1974,7 @@
 
     <!-- QR Code (Desktop Only) -->
     <div class="qr-code-container">
-        <img src="img/qrcodes.png" decoding="async" alt="QR Codes" class="qr-code-image">
+        <img src="assets/images/ui/qrcodes.png" decoding="async" alt="QR Codes" class="qr-code-image">
         <div class="qr-code-text">
             <div class="qr-code-url">JEIU.CC</div>
             <div class="qr-code-instruction">모바일로</br>접속해주세요</div>
@@ -2006,7 +2006,7 @@
                 </div>
 
                 <div class="logo-container">
-                    <img src="jeiu-logo.svg" class="jeiu-logo">
+                    <img src="assets/images/ui/jeiu-logo.svg" class="jeiu-logo">
                 </div>
 
                 <span class="brand-tag">Creative Collection</span>
@@ -2152,7 +2152,7 @@
         </div>
     </footer>
     <!-- Shader Script -->
-    <script src="shader.js"></script>
+    <script src="assets/js/main.js"></script>
 </body>
 
 </html>
