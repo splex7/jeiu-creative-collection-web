@@ -433,17 +433,34 @@
             /* ------------------------ 학생 JSON 로드 (D1 API) ------------------------ */
             async function loadStudentData() {
                 try {
-                    const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                    const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc';
+                    // Determine API base URL based on current hostname
+                    const hostname = window.location.hostname;
+                    let apiBaseUrl;
+
+                    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                        apiBaseUrl = 'http://localhost:8787'; // For local development
+                    } else if (hostname === 'jeiu.cc' || hostname.endsWith('.workers.dev')) {
+                        apiBaseUrl = ''; // Use relative path for same domain
+                    } else {
+                        apiBaseUrl = 'https://jeiu.cc'; // For other domains that need to access production
+                    }
+
+                    console.log(`Fetching student data from: ${apiBaseUrl}/api/students`);
                     const res = await fetch(`${apiBaseUrl}/api/students`);
-                    return await res.json();
+                    const data = await res.json();
+                    console.log(`Student data loaded: ${Object.keys(data).length} students`);
+                    return data;
                 } catch (error) {
                     console.error('Failed to load student data from API:', error);
                     // Fallback to local JSON file if API fails
                     try {
+                        console.log('Falling back to local students.json');
                         const res = await fetch("assets/data/students.json");
-                        return await res.json();
+                        const data = await res.json();
+                        console.log(`Loaded ${Object.keys(data).length} students from local JSON`);
+                        return data;
                     } catch {
+                        console.error('Failed to load from local JSON as well');
                         return {};
                     }
                 }
