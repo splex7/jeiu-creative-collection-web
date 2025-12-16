@@ -69,6 +69,21 @@ The migration scripts will transfer all 39 student records from the JSON file to
 **Before deployment:** `/api/students` returns 404 "Route not found"
 **After deployment:** `/api/students` should return 200 with student data (initially empty)
 
+## Database Schema Status
+
+**Important:** The students table does not yet exist in the D1 database and needs to be created:
+
+1. **Schema File:** `database/migrations/001_create_students_table.sql` contains the required schema
+2. **Migration Required:** The schema must be applied to the D1 database using one of these methods:
+   - Cloudflare Wrangler CLI: `wrangler d1 migrations apply jeiu-comments`
+   - Direct SQL execution: `wrangler d1 execute jeiu-comments --command="CREATE TABLE..."`
+   - Cloudflare Dashboard SQL tab
+
+3. **Database Name:** Verify the database name matches the one in `wrangler.toml` (should be "jeiu-comments")
+
+**Before running migration scripts:** The students table must exist in the D1 database
+**After schema application:** The API endpoints will be able to store and retrieve student data
+
 ## Fallback Mechanism
 
 If the API call to retrieve student data fails, the frontend will automatically fall back to using the local `students.json` file to ensure the site continues to function.

@@ -11,13 +11,22 @@ Expected result: `/api/students` should return 404 "Route not found"
 
 ## Deployment Steps
 
-1. **Deploy the Cloudflare Worker**
+1. **Apply Database Schema**
+   - Apply the students table schema to the D1 database:
+     ```bash
+     # Using wrangler CLI
+     wrangler d1 execute jeiu-comments --file="database/migrations/001_create_students_table.sql"
+
+     # Or using the SQL directly in Cloudflare Dashboard
+     ```
+   - Verify the table was created by checking the database structure
+
+3. **Deploy the Cloudflare Worker**
    - Update files in `worker/src/`:
      - `worker/src/index.js` (includes the students endpoint routing)
      - `worker/src/handlers/students.js` (the students API handlers)
-   - Ensure the D1 database has the students table schema
 
-2. **Verify Deployment**
+4. **Verify Deployment**
    Run the verification script:
    ```bash
    node verify-deployment.js
