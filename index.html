@@ -430,13 +430,22 @@
             }
 
 
-            /* ------------------------ 학생 JSON 로드 ------------------------ */
+            /* ------------------------ 학생 JSON 로드 (D1 API) ------------------------ */
             async function loadStudentData() {
                 try {
-                    const res = await fetch("assets/data/students.json");
+                    const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const apiBaseUrl = isLocalDevelopment ? 'https://jeiu.cc' : 'https://jeiu.cc';
+                    const res = await fetch(`${apiBaseUrl}/api/students`);
                     return await res.json();
-                } catch {
-                    return {};
+                } catch (error) {
+                    console.error('Failed to load student data from API:', error);
+                    // Fallback to local JSON file if API fails
+                    try {
+                        const res = await fetch("assets/data/students.json");
+                        return await res.json();
+                    } catch {
+                        return {};
+                    }
                 }
             }
 

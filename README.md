@@ -42,25 +42,26 @@ jeiu-creative-collection/
 - `class_name`: 반 이름 ("a반", "b반")
 - 기타 프로젝트 정보 필드
 
+### D1 Database (Students - 현재)
+학생 데이터는 이제 D1 데이터베이스에 저장됩니다:
+
+**students 테이블:**
+- `name`: 학생 이름 (기본 키)
+- `img`: 학생 사진 경로
+- `reflections`: 학생 소감/후기 (기본 키로 사용되던 JSON의 `소감` 필드)
+
 ### API 엔드포인트
 - `GET /api/teams`: 모든 팀 데이터 조회
 - `POST /api/teams`: 새 팀 생성
+- `GET /api/students`: 모든 학생 데이터 조회
+- `POST /api/students`: 단일 학생 생성 또는 업데이트
+- `PUT /api/students`: 다수 학생 데이터 일괄 삽입
 
-### students.json (레거시)
-- `a반`, `b반`: 반별 팀 정보
-- `조이름`: 팀명
-- `조원`: 팀 구성원 배열
-- `작품설명`: 프로젝트 설명
-- `예상플랫폼`: 서비스 플랫폼 (데스크톱, 모바일 등)
-- `최종발표영상`: 최종 발표 영상 URL
-- `중간발표영상`: 중간 발표 영상 URL
-- `최종발표자`: 발표자 이름
-- `판넬제출여부`: 판넬 제출 여부 ('Y' 또는 공란)
-
-### students.json
-- 학생 이름을 키로 하는 객체
+### students.json (레거시 - 이전됨)
+- 학생 이름을 키로 하는 객체 (이전 데이터 구조)
 - `name`: 학생 이름
 - `img`: 학생 사진 경로 또는 placeholder URL
+- `소감`: 학생의 졸업작품 관련 소감 및 후기
 
 ## 🖥️ 기술적인 특징
 

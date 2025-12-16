@@ -4,6 +4,7 @@
 import { onRequestGet, onRequestPost, onRequestDelete as deleteComment } from './handlers/comments.js';
 import { onRequestGet as getCommentCounts } from './handlers/comment-counts.js';
 import { onRequestGet as getTeams, onRequestPost as createTeam } from './handlers/teams.js';
+import { onRequestGet as getStudents, onRequestPost as createStudent, onRequestPut as importStudents } from './handlers/students.js';
 
 export default {
     async fetch(request, env, ctx) {
@@ -71,7 +72,7 @@ export default {
                 // Debug endpoint to test D1 connection
                 try {
                     const testResult = await env.DB.prepare('SELECT COUNT(*) as count FROM teams').first();
-                    return addCorsHeaders(new Response(JSON.stringify({ 
+                    return addCorsHeaders(new Response(JSON.stringify({
                         d1_connected: true,
                         environment: env.ENVIRONMENT,
                         db_exists: !!env.DB,
@@ -83,13 +84,28 @@ export default {
                         }
                     }));
                 } catch (error) {
-                    return addCorsHeaders(new Response(JSON.stringify({ 
+                    return addCorsHeaders(new Response(JSON.stringify({
                         d1_connected: false,
                         error: error.message,
                         environment: env.ENVIRONMENT,
                         db_exists: !!env.DB
                     }), {
                         status: 500,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }));
+                }
+            } else if (path.startsWith('/api/students')) {
+                if (request.method === 'GET') {
+                    return addCorsHeaders(await getStudents({ request, env }));
+                } else if (request.method === 'POST') {
+                    return addCorsHeaders(await createStudent({ request, env }));
+                } else if (request.method === 'PUT') {
+                    return addCorsHeaders(await importStudents({ request, env }));
+                } else {
+                    return addCorsHeaders(new Response(JSON.stringify({ error: 'Method not allowed' }), {
+                        status: 405,
                         headers: {
                             'Content-Type': 'application/json'
                         }
