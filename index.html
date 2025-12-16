@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
     <!-- Cache Optimization -->
     <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
@@ -65,6 +65,49 @@
     </script>
 
     <title>JEIU Creative Collection</title>
+
+    <!-- iOS Zoom Prevention -->
+    <style>
+        /* Prevent iOS zoom on input focus */
+        @supports (-webkit-touch-callout: none) {
+            .comment-name-input,
+            .comment-text-input {
+                font-size: 16px !important;
+                -webkit-text-size-adjust: 100% !important;
+                transform: scale(1) !important;
+            }
+        }
+        
+        /* Additional iOS input fixes */
+        input[type="text"],
+        textarea {
+            appearance: none;
+            -webkit-appearance: none;
+            border-radius: 0;
+        }
+        
+        /* Prevent zoom on focus */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            select,
+            textarea,
+            input[type="text"],
+            input[type="password"],
+            input[type="datetime"],
+            input[type="datetime-local"],
+            input[type="date"],
+            input[type="month"],
+            input[type="time"],
+            input[type="week"],
+            input[type="number"],
+            input[type="email"],
+            input[type="url"],
+            input[type="search"],
+            input[type="tel"],
+            input[type="color"] {
+                font-size: 16px !important;
+            }
+        }
+    </style>
 
     <!-- Flicking CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@egjs/flicking@4.11.3/dist/flicking.css">
