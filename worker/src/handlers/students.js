@@ -8,7 +8,8 @@ export async function onRequestGet({ request, env }) {
             SELECT
                 name,
                 img,
-                reflections
+                reflections,
+                url
             FROM students
         `).all();
 
@@ -19,7 +20,8 @@ export async function onRequestGet({ request, env }) {
             studentsData[student.name] = {
                 name: student.name,
                 img: student.img,
-                소감: student.reflections
+                소감: student.reflections,
+                url: student.url  // Include URL in the response
             };
         });
 
@@ -70,11 +72,12 @@ export async function onRequestPost({ request, env }) {
             // Update existing student
             const result = await env.DB.prepare(`
                 UPDATE students
-                SET img = ?, reflections = ?, updated_at = ?
+                SET img = ?, reflections = ?, url = ?, updated_at = ?
                 WHERE name = ?
             `).bind(
                 studentData.img || null,
                 studentData.소감 || null,
+                studentData.url || null,
                 Math.floor(Date.now() / 1000),
                 studentData.name
             ).run();
@@ -96,12 +99,13 @@ export async function onRequestPost({ request, env }) {
             // Insert new student
             const result = await env.DB.prepare(`
                 INSERT INTO students (
-                    name, img, reflections
-                ) VALUES (?, ?, ?)
+                    name, img, reflections, url
+                ) VALUES (?, ?, ?, ?)
             `).bind(
                 studentData.name,
                 studentData.img || null,
-                studentData.소감 || null
+                studentData.소감 || null,
+                studentData.url || null
             ).run();
 
             if (result.success) {
@@ -151,8 +155,8 @@ export async function onRequestPut({ request, env }) {
         }
 
         // Convert object format to array if needed
-        const studentArray = Array.isArray(studentsData) 
-            ? studentsData 
+        const studentArray = Array.isArray(studentsData)
+            ? studentsData
             : Object.entries(studentsData).map(([name, data]) => ({
                 name,
                 ...data
@@ -160,8 +164,8 @@ export async function onRequestPut({ request, env }) {
 
         // Begin transaction for bulk insert/update
         const stmt = env.DB.prepare(`
-            INSERT OR REPLACE INTO students (name, img, reflections)
-            VALUES (?, ?, ?)
+            INSERT OR REPLACE INTO students (name, img, reflections, url)
+            VALUES (?, ?, ?, ?)
         `);
 
         let successCount = 0;
@@ -170,7 +174,8 @@ export async function onRequestPut({ request, env }) {
                 await stmt.bind(
                     student.name,
                     student.img || null,
-                    student.소감 || null
+                    student.소감 || null,
+                    student.url || null
                 ).run();
                 successCount++;
             } catch (error) {

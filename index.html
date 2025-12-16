@@ -466,6 +466,27 @@
                 }
             }
 
+            /* ------------------------ 학생 이름 클릭 처리 ------------------------ */
+            async function handleMemberNameClick(studentName) {
+                try {
+                    // Load student data again to get the URL
+                    const students = await loadStudentData();
+                    const studentData = students[studentName];
+
+                    if (studentData && studentData.url) {
+                        // URL exists, open in new tab
+                        window.open(studentData.url, '_blank');
+                    } else {
+                        // URL doesn't exist, show "준비중" alert
+                        alert("준비중입니다.");
+                    }
+                } catch (error) {
+                    console.error('Error handling member name click:', error);
+                    // Fallback to showing "준비중" if there's an error
+                    alert("준비중입니다.");
+                }
+            }
+
             /* ------------------------ 프로젝트 데이터 로드 ------------------------ */
             async function loadProjectData(studentData, year) {
                 try {
@@ -584,7 +605,7 @@
                                                 <div class="member-avatar">
                                                     <img src="${m.img}" decoding="async" onerror="this.src='https://via.placeholder.com/100/444444/FFFFFF?text=?'">
                                                 </div>
-                                                <div class="member-name">${m.name}</div>
+                                                <div class="member-name" onclick="handleMemberNameClick('${m.name}')">${m.name}</div>
                                             </div>
                                         `).join("")}
                                     </div>

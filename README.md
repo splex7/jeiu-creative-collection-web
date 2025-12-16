@@ -48,7 +48,8 @@ jeiu-creative-collection/
 **students 테이블:**
 - `name`: 학생 이름 (기본 키)
 - `img`: 학생 사진 경로
-- `reflections`: 학생 소감/후기 (기본 키로 사용되던 JSON의 `소감` 필드)
+- `reflections`: 학생 소감/후기 (기존 JSON의 `소감` 필드)
+- `url`: 학생 프로필 또는 프로젝트 URL (클릭 가능한 이름 기능용)
 
 ### API 엔드포인트
 - `GET /api/teams`: 모든 팀 데이터 조회
