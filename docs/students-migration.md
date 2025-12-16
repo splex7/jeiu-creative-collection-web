@@ -28,12 +28,27 @@ The students table includes:
 
 To migrate existing student data from JSON to D1:
 
-### Method 1: Bulk Migration (Recommended)
+### Step 1: Deploy the Cloudflare Worker
 1. Deploy the updated worker with the new schema and endpoints
-2. Run the robust migration script:
-   ```bash
-   ./migrate-students-robust.sh
-   ```
+   - Files to deploy: `worker/src/index.js`, `worker/src/handlers/students.js`
+   - Make sure the D1 database has the students table schema
+
+**Important: Current API Test Results**
+- The `/api/students` endpoint currently returns 404 "Route not found" on jeiu.cc
+- This confirms the updated Worker with students endpoint is not yet deployed
+- Run `./test-api-connection.sh` to verify current status
+
+### Step 2: Verify Deployment
+Run the verification script after deployment:
+```bash
+node verify-deployment.js
+```
+
+### Method 1: Bulk Migration (Recommended)
+After successful deployment, run the robust migration script:
+```bash
+./migrate-students-robust.sh
+```
 
 ### Method 2: Individual Records
 If you prefer to migrate records one by one:
@@ -48,6 +63,11 @@ For direct migration from the website, copy the content from `migrate-students-b
 Use the web interface at `migrate-students.html` to migrate data interactively.
 
 The migration scripts will transfer all 39 student records from the JSON file to the D1 database.
+
+## Current Status
+
+**Before deployment:** `/api/students` returns 404 "Route not found"
+**After deployment:** `/api/students` should return 200 with student data (initially empty)
 
 ## Fallback Mechanism
 

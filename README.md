@@ -53,9 +53,14 @@ jeiu-creative-collection/
 ### API 엔드포인트
 - `GET /api/teams`: 모든 팀 데이터 조회
 - `POST /api/teams`: 새 팀 생성
-- `GET /api/students`: 모든 학생 데이터 조회
-- `POST /api/students`: 단일 학생 생성 또는 업데이트
-- `PUT /api/students`: 다수 학생 데이터 일괄 삽입
+- `GET /api/students`: 모든 학생 데이터 조회 (새로 추가됨 - 배포 필요)
+- `POST /api/students`: 단일 학생 생성 또는 업데이트 (새로 추가됨 - 배포 필요)
+- `PUT /api/students`: 다수 학생 데이터 일괄 삽입 (새로 추가됨 - 배포 필요)
+
+**배포 상태 확인:**
+- 현재 서버(https://jeiu.cc)에서는 `/api/students` 엔드포인트가 404 오류를 반환합니다.
+- 이는 학생 데이터베이스 기능이 아직 서버에 배포되지 않았음을 의미합니다.
+- 배포 후에는 정상적으로 작동합니다.
 
 ### students.json (레거시 - 이전됨)
 - 학생 이름을 키로 하는 객체 (이전 데이터 구조)
