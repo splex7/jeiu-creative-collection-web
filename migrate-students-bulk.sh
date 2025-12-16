@@ -1,6 +1,6 @@
 #!/bin/bash
 # Bulk import script for students data to D1 database
-# Generated on 2025-12-16T15:48:04.202Z
+# Generated on 2025-12-16T15:56:38.446Z
 
 echo "Starting bulk migration of 39 students to D1 database..."
 

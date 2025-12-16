@@ -28,13 +28,26 @@ The students table includes:
 
 To migrate existing student data from JSON to D1:
 
+### Method 1: Bulk Migration (Recommended)
 1. Deploy the updated worker with the new schema and endpoints
-2. Run the migration script:
+2. Run the robust migration script:
    ```bash
-   ./migrate-students-bulk.sh
+   ./migrate-students-robust.sh
    ```
-   
-The migration script will transfer all 39 student records from the JSON file to the D1 database.
+
+### Method 2: Individual Records
+If you prefer to migrate records one by one:
+```bash
+./migrate-students-individual.sh
+```
+
+### Method 3: Browser-based Migration
+For direct migration from the website, copy the content from `migrate-students-browser.js` into the browser console on the jeiu.cc site.
+
+### Method 4: Web-based Migration Tool
+Use the web interface at `migrate-students.html` to migrate data interactively.
+
+The migration scripts will transfer all 39 student records from the JSON file to the D1 database.
 
 ## Fallback Mechanism
 

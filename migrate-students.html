@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEIU Student Data Migration Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            display: block;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JEIU 학생 데이터 마이그레이션 도구</h1>
+        <p>이 도구는 학생 데이터를 JSON 파일에서 D1 데이터베이스로 마이그레이션합니다.</p>
+        
+        <div id="statusInfo" class="status info">준비 완료. 마이그레이션을 시작하세요.</div>
+        <div id="statusSuccess" class="status success" style="display:none;"></div>
+        <div id="statusError" class="status error" style="display:none;"></div>
+        
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="migrateBtn">학생 데이터 마이그레이션</button>
+            <button id="testBtn">API 연결 테스트</button>
+            <button id="checkBtn">데이터 확인</button>
+        </div>
+        
+        <div id="results" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; min-height: 100px; white-space: pre-wrap;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const migrateBtn = document.getElementById('migrateBtn');
+            const testBtn = document.getElementById('testBtn');
+            const checkBtn = document.getElementById('checkBtn');
+            const statusInfo = document.getElementById('statusInfo');
+            const statusSuccess = document.getElementById('statusSuccess');
+            const statusError = document.getElementById('statusError');
+            const progressBar = document.getElementById('progressBar');
+            const results = document.getElementById('results');
+
+            function updateStatus(type, message) {
+                statusInfo.style.display = 'none';
+                statusSuccess.style.display = 'none';
+                statusError.style.display = 'none';
+                
+                if (type === 'info') {
+                    statusInfo.textContent = message;
+                    statusInfo.style.display = 'block';
+                } else if (type === 'success') {
+                    statusSuccess.textContent = message;
+                    statusSuccess.style.display = 'block';
+                } else if (type === 'error') {
+                    statusError.textContent = message;
+                    statusError.style.display = 'block';
+                }
+            }
+
+            function updateProgress(percent) {
+                progressBar.style.width = percent + '%';
+            }
+
+            async function testConnection() {
+                updateStatus('info', 'API 연결을 테스트 중...');
+                results.textContent = 'API 연결 테스트 중...\n';
+                
+                try {
+                    const response = await fetch('/api/debug');
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.textContent += `디버그 정보: ${JSON.stringify(data, null, 2)}\n`;
+                        updateStatus('success', 'API 연결 성공!');
+                    } else {
+                        throw new Error(`API 응답 오류: ${response.status}`);
+                    }
+                } catch (error) {
+                    results.textContent += `연결 실패: ${error.message}\n`;
+                    updateStatus('error', 'API 연결 실패!');
+                }
+            }
+
+            async function checkStudentData() {
+                updateStatus('info', '학생 데이터 확인 중...');
+                results.textContent = '학생 데이터 확인 중...\n';
+                
+                try {
+                    // First try to get from API
+                    results.textContent += 'API에서 학생 데이터를 가져오는 중...\n';
+                    const apiResponse = await fetch('/api/students');
+                    if (apiResponse.ok) {
+                        const apiData = await apiResponse.json();
+                        const apiCount = Object.keys(apiData).length;
+                        results.textContent += `API에서 ${apiCount}명의 학생 데이터 확인\n`;
+                        
+                        if (apiCount > 0) {
+                            results.textContent += `API 데이터 샘플: ${JSON.stringify(Object.entries(apiData).slice(0, 2), null, 2)}\n`;
+                        }
+                    } else {
+                        results.textContent += `API에서 데이터를 가져오지 못함: ${apiResponse.status}\n`;
+                    }
+
+                    // Then check local JSON
+                    results.textContent += '\n로컬 JSON 파일에서 학생 데이터를 확인 중...\n';
+                    const jsonResponse = await fetch('assets/data/students.json');
+                    if (jsonResponse.ok) {
+                        const jsonData = await jsonResponse.json();
+                        const jsonCount = Object.keys(jsonData).length;
+                        results.textContent += `JSON 파일에서 ${jsonCount}명의 학생 데이터 확인\n`;
+                        
+                        if (jsonCount > 0) {
+                            results.textContent += `JSON 데이터 샘플: ${JSON.stringify(Object.entries(jsonData).slice(0, 2), null, 2)}\n`;
+                        }
+                    } else {
+                        results.textContent += `로컬 JSON 파일에서 데이터를 가져오지 못함: ${jsonResponse.status}\n`;
+                    }
+                    
+                    updateStatus('success', '데이터 확인 완료!');
+                } catch (error) {
+                    results.textContent += `데이터 확인 실패: ${error.message}\n`;
+                    updateStatus('error', '데이터 확인 실패!');
+                }
+            }
+
+            async function migrateStudents() {
+                updateStatus('info', '학생 데이터 마이그레이션 중...');
+                results.textContent = '학생 데이터 마이그레이션 시작...\n';
+                migrateBtn.disabled = true;
+                
+                try {
+                    // Load student data from JSON
+                    results.textContent += '로컬 JSON 파일에서 학생 데이터 불러오는 중...\n';
+                    const response = await fetch('assets/data/students.json');
+                    if (!response.ok) {
+                        throw new Error(`JSON 파일 로드 실패: ${response.status}`);
+                    }
+                    
+                    const studentsData = await response.json();
+                    const studentCount = Object.keys(studentsData).length;
+                    results.textContent += `${studentCount}명의 학생 데이터를 불러왔습니다.\n`;
+                    
+                    if (studentCount === 0) {
+                        throw new Error('학생 데이터가 없습니다.');
+                    }
+                    
+                    // Convert to array format for API
+                    const studentsArray = Object.entries(studentsData).map(([name, data]) => ({
+                        name: name,
+                        img: data.img,
+                        소감: data.소감
+                    }));
+                    
+                    results.textContent += 'D1 데이터베이스로 데이터 전송 중...\n';
+                    updateProgress(50);
+                    
+                    // Send to API
+                    const apiResponse = await fetch('/api/students', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(studentsArray)
+                    });
+                    
+                    updateProgress(90);
+                    
+                    if (!apiResponse.ok) {
+                        const errorText = await apiResponse.text();
+                        throw new Error(`API 응답 오류: ${apiResponse.status} - ${errorText}`);
+                    }
+                    
+                    const result = await apiResponse.json();
+                    updateProgress(100);
+                    
+                    results.textContent += `마이그레이션 완료!\n`;
+                    results.textContent += `결과: ${JSON.stringify(result, null, 2)}\n`;
+                    
+                    updateStatus('success', `성공적으로 ${result.imported_count}명의 학생 데이터를 마이그레이션했습니다!`);
+                } catch (error) {
+                    results.textContent += `마이그레이션 실패: ${error.message}\n`;
+                    updateStatus('error', `마이그레이션 실패: ${error.message}`);
+                } finally {
+                    migrateBtn.disabled = false;
+                }
+            }
+
+            // Event listeners
+            migrateBtn.addEventListener('click', migrateStudents);
+            testBtn.addEventListener('click', testConnection);
+            checkBtn.addEventListener('click', checkStudentData);
+
+            // Initialize
+            updateProgress(0);
+        });
+    </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Migration script for students data to D1 database
-# Generated on 2025-12-16T15:48:04.199Z
+# Generated on 2025-12-16T15:56:38.441Z
 
 echo "Starting migration of 39 students to D1 database..."
 
